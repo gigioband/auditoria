@@ -67,15 +67,12 @@ body {
 .hero {
     background: linear-gradient(
         135deg,
-        var(--info-light) 0%,
-        var(--info-color) 50%,
-        var(--info-dark) 100%
+        #79928f 0%,
+        #5f7774 45%,
+        #4b615e 100%
     );
-    color: white;
-    padding: 80px 0 100px;
-    position: relative;
-    overflow: hidden;
 }
+
 
 
 .hero::before {
