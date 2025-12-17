@@ -3,953 +3,2918 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Auditoria de Consistência - KALANA vs PLANURBI</title>
-    <link rel="stylesheet" href="css/style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css">
+    <title>Auditoria de Consistência | Kalana vs Planurbi</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --primary: #00362D;
+            --primary-light: #004D40;
+            --primary-dark: #001F1A;
+            --accent: #00BFA5;
+            --accent-glow: rgba(0, 191, 165, 0.3);
+            --bg-dark: #0A0F0D;
+            --bg-surface: #0F1915;
+            --bg-card: #142420;
+            --bg-card-hover: #1A2E28;
+            --text-primary: #E8F5E9;
+            --text-secondary: #A5C4B8;
+            --text-muted: #6B8F82;
+            --success: #4CAF50;
+            --success-bg: rgba(76, 175, 80, 0.15);
+            --warning: #FFB300;
+            --warning-bg: rgba(255, 179, 0, 0.15);
+            --error: #FF5252;
+            --error-bg: rgba(255, 82, 82, 0.15);
+            --gold: #FFD700;
+            --silver: #C0C0C0;
+            --bronze: #CD7F32;
+            --border: rgba(0, 191, 165, 0.2);
+            --shadow: 0 4px 24px rgba(0, 0, 0, 0.4);
+            --shadow-glow: 0 0 40px rgba(0, 191, 165, 0.15);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: var(--bg-dark);
+            color: var(--text-primary);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: var(--bg-dark);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: var(--primary-light);
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--accent);
+        }
+
+        /* Background Pattern */
+        .bg-pattern {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+            background: 
+                radial-gradient(ellipse at 20% 20%, rgba(0, 191, 165, 0.08) 0%, transparent 50%),
+                radial-gradient(ellipse at 80% 80%, rgba(0, 54, 45, 0.3) 0%, transparent 50%),
+                linear-gradient(180deg, var(--bg-dark) 0%, var(--bg-surface) 100%);
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 24px;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Navigation */
+        nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            background: rgba(10, 15, 13, 0.9);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border);
+            transition: all 0.3s ease;
+        }
+
+        nav .container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 72px;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-weight: 700;
+            font-size: 1.25rem;
+            color: var(--text-primary);
+            text-decoration: none;
+        }
+
+        .logo-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 32px;
+            list-style: none;
+        }
+
+        .nav-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: color 0.3s ease;
+            position: relative;
+        }
+
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: -4px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: var(--accent);
+            transition: width 0.3s ease;
+        }
+
+        .nav-links a:hover {
+            color: var(--accent);
+        }
+
+        .nav-links a:hover::after {
+            width: 100%;
+        }
+
+        .nav-cta {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+            color: var(--text-primary);
+            padding: 10px 24px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+            border: 1px solid var(--accent);
+        }
+
+        .nav-cta:hover {
+            background: var(--accent);
+            color: var(--primary-dark);
+            box-shadow: var(--shadow-glow);
+        }
+
+        /* Hero Section */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            padding: 120px 0 80px;
+            position: relative;
+        }
+
+        .hero-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 80px;
+            align-items: center;
+        }
+
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: var(--success-bg);
+            color: var(--success);
+            padding: 8px 16px;
+            border-radius: 50px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-bottom: 24px;
+            border: 1px solid rgba(76, 175, 80, 0.3);
+        }
+
+        .hero-badge::before {
+            content: '';
+            width: 8px;
+            height: 8px;
+            background: var(--success);
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.5; transform: scale(1.2); }
+        }
+
+        .hero h1 {
+            font-size: 3.5rem;
+            font-weight: 800;
+            line-height: 1.1;
+            margin-bottom: 24px;
+            background: linear-gradient(135deg, var(--text-primary) 0%, var(--accent) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero-subtitle {
+            font-size: 1.25rem;
+            color: var(--text-secondary);
+            margin-bottom: 16px;
+            font-weight: 400;
+        }
+
+        .hero-meta {
+            display: flex;
+            gap: 24px;
+            margin-bottom: 40px;
+            flex-wrap: wrap;
+        }
+
+        .hero-meta-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        .hero-meta-item svg {
+            width: 18px;
+            height: 18px;
+            color: var(--accent);
+        }
+
+        .hero-stats {
+            background: var(--bg-card);
+            border-radius: 24px;
+            padding: 40px;
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-stats::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--accent), var(--success), var(--accent));
+        }
+
+        .main-stat {
+            text-align: center;
+            margin-bottom: 32px;
+            padding-bottom: 32px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .main-stat-value {
+            font-size: 5rem;
+            font-weight: 800;
+            color: var(--accent);
+            line-height: 1;
+            text-shadow: 0 0 60px var(--accent-glow);
+        }
+
+        .main-stat-label {
+            font-size: 1.1rem;
+            color: var(--text-secondary);
+            margin-top: 8px;
+            font-weight: 500;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 24px;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 16px;
+            background: var(--bg-surface);
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            transition: all 0.3s ease;
+        }
+
+        .stat-item:hover {
+            border-color: var(--accent);
+            transform: translateY(-2px);
+        }
+
+        .stat-value {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .stat-value.success { color: var(--success); }
+        .stat-value.warning { color: var(--warning); }
+        .stat-value.error { color: var(--error); }
+
+        .stat-label {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-top: 4px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* Section Styles */
+        section {
+            padding: 100px 0;
+            position: relative;
+        }
+
+        .section-header {
+            text-align: center;
+            margin-bottom: 60px;
+        }
+
+        .section-label {
+            display: inline-block;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--accent);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 16px;
+        }
+
+        .section-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 16px;
+        }
+
+        .section-desc {
+            font-size: 1.1rem;
+            color: var(--text-secondary);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        /* Metrics Dashboard */
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 24px;
+            margin-bottom: 60px;
+        }
+
+        .metric-card {
+            background: var(--bg-card);
+            border-radius: 16px;
+            padding: 28px;
+            border: 1px solid var(--border);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .metric-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: var(--accent);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .metric-card:hover {
+            transform: translateY(-4px);
+            border-color: var(--accent);
+            box-shadow: var(--shadow-glow);
+        }
+
+        .metric-card:hover::before {
+            opacity: 1;
+        }
+
+        .metric-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            margin-bottom: 16px;
+        }
+
+        .metric-icon.green { background: var(--success-bg); }
+        .metric-icon.yellow { background: var(--warning-bg); }
+        .metric-icon.red { background: var(--error-bg); }
+        .metric-icon.blue { background: rgba(33, 150, 243, 0.15); }
+
+        .metric-value {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 4px;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .metric-label {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        .metric-trend {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 0.8rem;
+            margin-top: 12px;
+            padding: 4px 10px;
+            border-radius: 50px;
+        }
+
+        .metric-trend.up {
+            background: var(--success-bg);
+            color: var(--success);
+        }
+
+        .metric-trend.down {
+            background: var(--error-bg);
+            color: var(--error);
+        }
+
+        /* Ranking Section */
+        .ranking-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+        }
+
+        .ranking-list {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .ranking-item {
+            background: var(--bg-card);
+            border-radius: 16px;
+            padding: 24px;
+            border: 1px solid var(--border);
+            display: grid;
+            grid-template-columns: auto 1fr auto;
+            gap: 20px;
+            align-items: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .ranking-item:hover {
+            border-color: var(--accent);
+            transform: translateX(8px);
+        }
+
+        .ranking-item.gold {
+            border-color: var(--gold);
+            background: linear-gradient(135deg, var(--bg-card) 0%, rgba(255, 215, 0, 0.05) 100%);
+        }
+
+        .ranking-position {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            font-weight: 700;
+            background: var(--bg-surface);
+        }
+
+        .ranking-item.gold .ranking-position {
+            background: linear-gradient(135deg, var(--gold), #FFA000);
+            color: var(--primary-dark);
+        }
+
+        .ranking-info h4 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .ranking-stats {
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+
+        .ranking-stat {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .ranking-stat strong {
+            color: var(--text-secondary);
+        }
+
+        .ranking-score {
+            text-align: right;
+        }
+
+        .ranking-percentage {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: var(--accent);
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .ranking-note {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        .ranking-chart {
+            background: var(--bg-card);
+            border-radius: 16px;
+            padding: 32px;
+            border: 1px solid var(--border);
+        }
+
+        .ranking-chart h3 {
+            font-size: 1.1rem;
+            margin-bottom: 24px;
+            color: var(--text-secondary);
+        }
+
+        /* Detailed Analysis */
+        .analysis-tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 32px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .analysis-tab {
+            padding: 12px 24px;
+            border-radius: 50px;
+            border: 1px solid var(--border);
+            background: var(--bg-card);
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .analysis-tab:hover,
+        .analysis-tab.active {
+            background: var(--accent);
+            color: var(--primary-dark);
+            border-color: var(--accent);
+        }
+
+        .analysis-content {
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .analysis-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .analysis-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 24px;
+            margin-bottom: 32px;
+        }
+
+        .analysis-card {
+            background: var(--bg-card);
+            border-radius: 16px;
+            padding: 24px;
+            border: 1px solid var(--border);
+        }
+
+        .analysis-card h4 {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 12px;
+        }
+
+        .analysis-card .value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .analysis-card .detail {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+
+        .divergence-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: var(--bg-card);
+            border-radius: 16px;
+            overflow: hidden;
+            border: 1px solid var(--border);
+        }
+
+        .divergence-table th,
+        .divergence-table td {
+            padding: 16px 20px;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .divergence-table th {
+            background: var(--bg-surface);
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-muted);
+            font-weight: 600;
+        }
+
+        .divergence-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .divergence-table tr:hover td {
+            background: var(--bg-card-hover);
+        }
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 12px;
+            border-radius: 50px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        .status-badge.ok {
+            background: var(--success-bg);
+            color: var(--success);
+        }
+
+        .status-badge.warning {
+            background: var(--warning-bg);
+            color: var(--warning);
+        }
+
+        .status-badge.critical {
+            background: var(--error-bg);
+            color: var(--error);
+        }
+
+        /* Critical Issues */
+        .critical-section {
+            background: linear-gradient(135deg, rgba(255, 82, 82, 0.05) 0%, var(--bg-surface) 100%);
+            border-radius: 24px;
+            padding: 48px;
+            border: 1px solid rgba(255, 82, 82, 0.2);
+            margin-top: 40px;
+        }
+
+        .critical-header {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 32px;
+        }
+
+        .critical-icon {
+            width: 56px;
+            height: 56px;
+            background: var(--error-bg);
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+
+        .critical-header h3 {
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .critical-header p {
+            font-size: 0.95rem;
+            color: var(--text-secondary);
+        }
+
+        .critical-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 24px;
+        }
+
+        .critical-card {
+            background: var(--bg-card);
+            border-radius: 16px;
+            padding: 24px;
+            border: 1px solid var(--border);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .critical-card::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 3px;
+        }
+
+        .critical-card.high::after { background: var(--error); }
+        .critical-card.medium::after { background: var(--warning); }
+        .critical-card.low::after { background: #2196F3; }
+
+        .critical-card h4 {
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .critical-card .number {
+            font-size: 2.5rem;
+            font-weight: 800;
+            font-family: 'JetBrains Mono', monospace;
+            margin-bottom: 8px;
+        }
+
+        .critical-card.high .number { color: var(--error); }
+        .critical-card.medium .number { color: var(--warning); }
+        .critical-card.low .number { color: #2196F3; }
+
+        .critical-card .description {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            line-height: 1.5;
+        }
+
+        /* Cases Section */
+        .cases-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 24px;
+        }
+
+        .case-card {
+            background: var(--bg-card);
+            border-radius: 16px;
+            padding: 28px;
+            border: 1px solid var(--border);
+            transition: all 0.3s ease;
+        }
+
+        .case-card:hover {
+            border-color: var(--accent);
+        }
+
+        .case-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 20px;
+        }
+
+        .case-type {
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            padding: 6px 12px;
+            border-radius: 6px;
+        }
+
+        .case-type.critical {
+            background: var(--error-bg);
+            color: var(--error);
+        }
+
+        .case-type.normal {
+            background: var(--success-bg);
+            color: var(--success);
+        }
+
+        .case-type.conflict {
+            background: var(--warning-bg);
+            color: var(--warning);
+        }
+
+        .case-id {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.9rem;
+            color: var(--accent);
+        }
+
+        .case-details {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+
+        .case-detail {
+            background: var(--bg-surface);
+            padding: 12px;
+            border-radius: 8px;
+        }
+
+        .case-detail-label {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 4px;
+        }
+
+        .case-detail-value {
+            font-size: 0.95rem;
+            font-weight: 600;
+        }
+
+        .case-analysis {
+            background: var(--bg-surface);
+            padding: 16px;
+            border-radius: 12px;
+            border-left: 3px solid var(--accent);
+        }
+
+        .case-analysis p {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+        }
+
+        .case-analysis p:last-child {
+            margin-bottom: 0;
+        }
+
+        .case-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 16px;
+            color: var(--accent);
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: gap 0.3s ease;
+        }
+
+        .case-link:hover {
+            gap: 12px;
+        }
+
+        /* Charts Section */
+        .charts-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 32px;
+        }
+
+        .chart-card {
+            background: var(--bg-card);
+            border-radius: 16px;
+            padding: 32px;
+            border: 1px solid var(--border);
+        }
+
+        .chart-card.full-width {
+            grid-column: 1 / -1;
+        }
+
+        .chart-card h3 {
+            font-size: 1.1rem;
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .chart-card h3 span {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            font-weight: 400;
+        }
+
+        /* Timeline Section */
+        .timeline {
+            position: relative;
+            padding-left: 32px;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 7px;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: linear-gradient(180deg, var(--accent), var(--primary));
+        }
+
+        .timeline-item {
+            position: relative;
+            padding-bottom: 40px;
+        }
+
+        .timeline-item:last-child {
+            padding-bottom: 0;
+        }
+
+        .timeline-dot {
+            position: absolute;
+            left: -32px;
+            top: 4px;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: var(--bg-dark);
+            border: 3px solid var(--accent);
+        }
+
+        .timeline-item.urgent .timeline-dot {
+            background: var(--error);
+            border-color: var(--error);
+        }
+
+        .timeline-item.short .timeline-dot {
+            background: var(--warning);
+            border-color: var(--warning);
+        }
+
+        .timeline-item.medium .timeline-dot {
+            background: var(--success);
+            border-color: var(--success);
+        }
+
+        .timeline-content {
+            background: var(--bg-card);
+            border-radius: 16px;
+            padding: 24px;
+            border: 1px solid var(--border);
+        }
+
+        .timeline-label {
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 8px;
+        }
+
+        .timeline-item.urgent .timeline-label { color: var(--error); }
+        .timeline-item.short .timeline-label { color: var(--warning); }
+        .timeline-item.medium .timeline-label { color: var(--success); }
+        .timeline-item.long .timeline-label { color: #2196F3; }
+
+        .timeline-content h4 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 12px;
+        }
+
+        .timeline-content ul {
+            list-style: none;
+        }
+
+        .timeline-content li {
+            position: relative;
+            padding-left: 20px;
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        .timeline-content li::before {
+            content: '→';
+            position: absolute;
+            left: 0;
+            color: var(--accent);
+        }
+
+        /* Goals Section */
+        .goals-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 16px;
+        }
+
+        .goal-card {
+            background: var(--bg-card);
+            border-radius: 16px;
+            padding: 24px;
+            border: 1px solid var(--border);
+            text-align: center;
+        }
+
+        .goal-card h4 {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            margin-bottom: 16px;
+        }
+
+        .goal-current {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .goal-target {
+            font-size: 0.85rem;
+            color: var(--accent);
+            margin-top: 8px;
+        }
+
+        .goal-progress {
+            height: 6px;
+            background: var(--bg-surface);
+            border-radius: 3px;
+            margin-top: 12px;
+            overflow: hidden;
+        }
+
+        .goal-progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent), var(--success));
+            border-radius: 3px;
+            transition: width 1s ease;
+        }
+
+        /* Files Section */
+        .files-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 24px;
+        }
+
+        .file-card {
+            background: var(--bg-card);
+            border-radius: 16px;
+            padding: 28px;
+            border: 1px solid var(--border);
+            transition: all 0.3s ease;
+        }
+
+        .file-card:hover {
+            border-color: var(--accent);
+            transform: translateY(-4px);
+        }
+
+        .file-card.main {
+            border-color: var(--accent);
+            background: linear-gradient(135deg, var(--bg-card) 0%, rgba(0, 191, 165, 0.05) 100%);
+        }
+
+        .file-header {
+            display: flex;
+            align-items: flex-start;
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+
+        .file-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+        }
+
+        .file-icon.xlsx { background: rgba(33, 150, 83, 0.2); }
+        .file-icon.md { background: rgba(33, 150, 243, 0.2); }
+        .file-icon.csv { background: rgba(156, 39, 176, 0.2); }
+
+        .file-info h4 {
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .file-info p {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .file-details {
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 1px solid var(--border);
+        }
+
+        .file-details ul {
+            list-style: none;
+        }
+
+        .file-details li {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            padding: 6px 0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .file-details li::before {
+            content: '•';
+            color: var(--accent);
+        }
+
+        /* Conclusion Section */
+        .conclusion {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+            border-radius: 24px;
+            padding: 60px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .conclusion::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(0, 191, 165, 0.1) 0%, transparent 50%);
+            animation: rotate 30s linear infinite;
+        }
+
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .conclusion-content {
+            position: relative;
+            z-index: 1;
+        }
+
+        .conclusion-score {
+            font-size: 6rem;
+            font-weight: 800;
+            color: var(--accent);
+            text-shadow: 0 0 60px var(--accent-glow);
+            margin-bottom: 16px;
+        }
+
+        .conclusion h2 {
+            font-size: 2rem;
+            margin-bottom: 24px;
+        }
+
+        .conclusion p {
+            font-size: 1.1rem;
+            color: var(--text-secondary);
+            max-width: 700px;
+            margin: 0 auto 32px;
+        }
+
+        .conclusion-cta {
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            background: var(--accent);
+            color: var(--primary-dark);
+            padding: 16px 32px;
+            border-radius: 12px;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .conclusion-cta:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 40px var(--accent-glow);
+        }
+
+        /* Footer */
+        footer {
+            padding: 60px 0 40px;
+            border-top: 1px solid var(--border);
+            margin-top: 100px;
+        }
+
+        .footer-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .footer-info p {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            margin-top: 8px;
+        }
+
+        .footer-meta {
+            text-align: right;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .footer-meta strong {
+            color: var(--text-secondary);
+        }
+
+        /* Responsive */
+        @media (max-width: 1200px) {
+            .hero-content {
+                grid-template-columns: 1fr;
+                gap: 40px;
+            }
+
+            .metrics-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .ranking-container {
+                grid-template-columns: 1fr;
+            }
+
+            .analysis-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .critical-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .goals-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 2.5rem;
+            }
+
+            .main-stat-value {
+                font-size: 3.5rem;
+            }
+
+            .metrics-grid,
+            .charts-grid,
+            .cases-grid,
+            .files-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .analysis-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .goals-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .nav-links {
+                display: none;
+            }
+
+            .conclusion {
+                padding: 40px 24px;
+            }
+
+            .conclusion-score {
+                font-size: 4rem;
+            }
+        }
+
+        /* Animations */
+        .fade-in {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.6s ease;
+        }
+
+        .fade-in.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .stagger-1 { transition-delay: 0.1s; }
+        .stagger-2 { transition-delay: 0.2s; }
+        .stagger-3 { transition-delay: 0.3s; }
+        .stagger-4 { transition-delay: 0.4s; }
+    </style>
 </head>
 <body>
+    <div class="bg-pattern"></div>
+
+    <!-- Navigation -->
+    <nav>
+        <div class="container">
+            <a href="#" class="logo">
+                <div class="logo-icon">📊</div>
+                <span>Auditoria Kalana × Planurbi</span>
+            </a>
+            <ul class="nav-links">
+                <li><a href="#metricas">Métricas</a></li>
+                <li><a href="#ranking">Ranking</a></li>
+                <li><a href="#analise">Análise</a></li>
+                <li><a href="#criticos">Críticos</a></li>
+                <li><a href="#acoes">Ações</a></li>
+            </ul>
+            <a href="#contato" class="nav-cta">Falar com Especialista</a>
+        </div>
+    </nav>
+
     <!-- Hero Section -->
     <section class="hero">
         <div class="container">
             <div class="hero-content">
-                <div class="hero-badge">
-                    <i class="fas fa-chart-line"></i>
-                    <span>Relatório de Auditoria 2025</span>
+                <div class="hero-text">
+                    <div class="hero-badge">Auditoria Concluída</div>
+                    <h1>Consistência de Dados Validada em 5 Bairros</h1>
+                    <p class="hero-subtitle">Auditoria comparativa completa entre os sistemas Kalana e Planurbi com análise de 3.468 registros imobiliários.</p>
+                    <div class="hero-meta">
+                        <div class="hero-meta-item">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                            </svg>
+                            16 de dezembro de 2025
+                        </div>
+                        <div class="hero-meta-item">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                            </svg>
+                            16 arquivos CSV auditados
+                        </div>
+                        <div class="hero-meta-item">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                            </svg>
+                            5 bairros analisados
+                        </div>
+                    </div>
                 </div>
-                <h1 class="hero-title">Auditoria de Consistência</h1>
-                
-                <p class="hero-description">Análise completa de 5 bairros: Barra Mar, Altavistta, Arquipélago do Sol, Recanto e Praia Bonita</p>
-                <div class="hero-date">
-                    <i class="far fa-calendar-alt"></i>
-                    <span>16 de dezembro de 2025</span>
+                <div class="hero-stats">
+                    <div class="main-stat">
+                        <div class="main-stat-value">97,2%</div>
+                        <div class="main-stat-label">Taxa de Consistência Geral</div>
+                    </div>
+                    <div class="stats-grid">
+                        <div class="stat-item">
+                            <div class="stat-value success">3.468</div>
+                            <div class="stat-label">Registros Auditados</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value error">80</div>
+                            <div class="stat-label">Regressões Críticas</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value">77%</div>
+                            <div class="stat-label">Cobertura Imagens</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value warning">371</div>
+                            <div class="stat-label">Atualizações T→P</div>
+                        </div>
+                    </div>
                 </div>
             </div>
-            
-            <!-- Main Metrics Cards -->
-            <div class="metrics-grid">
-                <div class="metric-card success">
-                    <div class="metric-icon">
-                        <i class="fas fa-check-circle"></i>
-                    </div>
-                    <div class="metric-content">
-                        <div class="metric-value">97,2%</div>
-                        <div class="metric-label">Taxa de Consistência</div>
-                        <div class="metric-trend">
-                            <i class="fas fa-arrow-up"></i>
-                            <span>Excelente</span>
-                        </div>
-                    </div>
-                </div>
+        </div>
+    </section>
 
-                <div class="metric-card info">
-                    <div class="metric-icon">
-                        <i class="fas fa-database"></i>
-                    </div>
-                    <div class="metric-content">
-                        <div class="metric-value">3.468</div>
-                        <div class="metric-label">Registros Auditados</div>
-                        <div class="metric-trend">
-                            <i class="fas fa-building"></i>
-                            <span>Com Match</span>
-                        </div>
-                    </div>
-                </div>
+    <!-- Metrics Section -->
+    <section id="metricas">
+        <div class="container">
+            <div class="section-header">
+                <div class="section-label">Dashboard</div>
+                <h2 class="section-title">Métricas Consolidadas</h2>
+                <p class="section-desc">Visão geral dos indicadores de qualidade e consistência entre as bases Kalana e Planurbi.</p>
+            </div>
 
-                <div class="metric-card warning">
-                    <div class="metric-icon">
-                        <i class="fas fa-exclamation-triangle"></i>
-                    </div>
-                    <div class="metric-content">
-                        <div class="metric-value">80</div>
-                        <div class="metric-label">Regressões Críticas</div>
-                        <div class="metric-trend">
-                            <i class="fas fa-search"></i>
-                            <span>P→T Investigar</span>
-                        </div>
-                    </div>
+            <div class="metrics-grid fade-in">
+                <div class="metric-card">
+                    <div class="metric-icon green">✓</div>
+                    <div class="metric-value" style="color: var(--success);">3.000</div>
+                    <div class="metric-label">Registros Consistentes (86,5%)</div>
+                    <div class="metric-trend up">↑ Tipos iguais em ambas bases</div>
                 </div>
+                <div class="metric-card">
+                    <div class="metric-icon blue">↗</div>
+                    <div class="metric-value" style="color: #2196F3;">371</div>
+                    <div class="metric-label">Atualizações T→P (10,7%)</div>
+                    <div class="metric-trend up">✓ Evolução natural do cadastro</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-icon red">⚠</div>
+                    <div class="metric-value" style="color: var(--error);">80</div>
+                    <div class="metric-label">Regressões P→T (2,3%)</div>
+                    <div class="metric-trend down">↓ Requer investigação urgente</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-icon yellow">⟳</div>
+                    <div class="metric-value" style="color: var(--warning);">1.152</div>
+                    <div class="metric-label">Registros Sem Match</div>
+                    <div class="metric-trend down">765 Planurbi + 387 Kalana</div>
+                </div>
+            </div>
 
-                <div class="metric-card primary">
-                    <div class="metric-icon">
-                        <i class="fas fa-image"></i>
-                    </div>
-                    <div class="metric-content">
-                        <div class="metric-value">77%</div>
-                        <div class="metric-label">Cobertura de Imagens</div>
-                        <div class="metric-trend">
-                            <i class="fas fa-camera"></i>
-                            <span>3.260 de 4.233</span>
-                        </div>
-                    </div>
+            <!-- Volume Details -->
+            <div class="charts-grid">
+                <div class="chart-card">
+                    <h3>📊 Volume de Dados por Base</h3>
+                    <canvas id="volumeChart" height="200"></canvas>
+                </div>
+                <div class="chart-card">
+                    <h3>🔄 Distribuição de Tipos de Divergência</h3>
+                    <canvas id="divergenceChart" height="200"></canvas>
                 </div>
             </div>
         </div>
     </section>
 
     <!-- Ranking Section -->
-    <section class="ranking-section">
+    <section id="ranking" style="background: var(--bg-surface);">
         <div class="container">
             <div class="section-header">
-                <h2 class="section-title">
-                    <i class="fas fa-trophy"></i>
-                    Ranking de Bairros
-                </h2>
-                <p class="section-subtitle">Avaliação de consistência por localidade</p>
+                <div class="section-label">Comparativo</div>
+                <h2 class="section-title">Ranking por Bairro</h2>
+                <p class="section-desc">Análise comparativa de consistência, volume de dados e cobertura de imagens por região.</p>
             </div>
 
-            <div class="ranking-grid">
-                <div class="ranking-card rank-1">
-                    <div class="rank-badge gold">
-                        <i class="fas fa-trophy"></i>
-                        <span>1º</span>
-                    </div>
-                    <div class="rank-content">
-                        <h3>Arquipélago do Sol</h3>
-                        <div class="rank-score">
-                            <div class="score-value">99,0%</div>
-                            <div class="score-rating">
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <span>10/10</span>
+            <div class="ranking-container">
+                <div class="ranking-list">
+                    <!-- 1º Arquipélago do Sol -->
+                    <div class="ranking-item gold fade-in">
+                        <div class="ranking-position">🥇</div>
+                        <div class="ranking-info">
+                            <h4>Arquipélago do Sol</h4>
+                            <div class="ranking-stats">
+                                <span class="ranking-stat">📄 <strong>388</strong> matches</span>
+                                <span class="ranking-stat">🔴 <strong>2</strong> regressões</span>
+                                <span class="ranking-stat">📷 <strong>99,3%</strong> imagens</span>
                             </div>
                         </div>
-                        <div class="rank-stats">
-                            <div class="stat-item">
-                                <i class="fas fa-check"></i>
-                                <span>388 matches</span>
+                        <div class="ranking-score">
+                            <div class="ranking-percentage">99,0%</div>
+                            <div class="ranking-note">10/10 ⭐</div>
+                        </div>
+                    </div>
+
+                    <!-- 2º Praia Bonita -->
+                    <div class="ranking-item fade-in stagger-1">
+                        <div class="ranking-position">🥈</div>
+                        <div class="ranking-info">
+                            <h4>Praia Bonita</h4>
+                            <div class="ranking-stats">
+                                <span class="ranking-stat">📄 <strong>242</strong> matches</span>
+                                <span class="ranking-stat">🔴 <strong>3</strong> regressões</span>
+                                <span class="ranking-stat" style="color: var(--error);">📷 <strong>42,6%</strong> imagens</span>
                             </div>
-                            <div class="stat-item">
-                                <i class="fas fa-image"></i>
-                                <span>99,3% imagens</span>
+                        </div>
+                        <div class="ranking-score">
+                            <div class="ranking-percentage">97,1%</div>
+                            <div class="ranking-note">7/10</div>
+                        </div>
+                    </div>
+
+                    <!-- 3º Barra Mar -->
+                    <div class="ranking-item fade-in stagger-2">
+                        <div class="ranking-position">🥈</div>
+                        <div class="ranking-info">
+                            <h4>Barra Mar</h4>
+                            <div class="ranking-stats">
+                                <span class="ranking-stat">📄 <strong>2.026</strong> matches</span>
+                                <span class="ranking-stat" style="color: var(--error);">🔴 <strong>52</strong> regressões</span>
+                                <span class="ranking-stat">📷 <strong>74,0%</strong> imagens</span>
                             </div>
-                            <div class="stat-item success">
-                                <i class="fas fa-shield-alt"></i>
-                                <span>Apenas 2 regressões</span>
+                        </div>
+                        <div class="ranking-score">
+                            <div class="ranking-percentage">97,1%</div>
+                            <div class="ranking-note">8/10</div>
+                        </div>
+                    </div>
+
+                    <!-- 4º Altavistta -->
+                    <div class="ranking-item fade-in stagger-3">
+                        <div class="ranking-position">🥈</div>
+                        <div class="ranking-info">
+                            <h4>Altavistta</h4>
+                            <div class="ranking-stats">
+                                <span class="ranking-stat">📄 <strong>630</strong> matches</span>
+                                <span class="ranking-stat">🔴 <strong>21</strong> regressões</span>
+                                <span class="ranking-stat">📷 <strong>79,8%</strong> imagens</span>
                             </div>
+                        </div>
+                        <div class="ranking-score">
+                            <div class="ranking-percentage">96,7%</div>
+                            <div class="ranking-note">8/10</div>
+                        </div>
+                    </div>
+
+                    <!-- 5º Recanto -->
+                    <div class="ranking-item fade-in stagger-4">
+                        <div class="ranking-position">🥈</div>
+                        <div class="ranking-info">
+                            <h4>Recanto</h4>
+                            <div class="ranking-stats">
+                                <span class="ranking-stat">📄 <strong>182</strong> matches</span>
+                                <span class="ranking-stat">🔴 <strong>2</strong> regressões</span>
+                                <span class="ranking-stat">📷 <strong>95,8%</strong> imagens</span>
+                            </div>
+                        </div>
+                        <div class="ranking-score">
+                            <div class="ranking-percentage">96,2%</div>
+                            <div class="ranking-note">8/10</div>
                         </div>
                     </div>
                 </div>
 
-                <div class="ranking-card rank-2">
-                    <div class="rank-badge silver">
-                        <i class="fas fa-medal"></i>
-                        <span>2º</span>
-                    </div>
-                    <div class="rank-content">
-                        <h3>Praia Bonita</h3>
-                        <div class="rank-score">
-                            <div class="score-value">97,1%</div>
-                            <div class="score-rating">
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star-half-alt"></i>
-                                <span>7/10</span>
-                            </div>
-                        </div>
-                        <div class="rank-stats">
-                            <div class="stat-item">
-                                <i class="fas fa-check"></i>
-                                <span>242 matches</span>
-                            </div>
-                            <div class="stat-item warning">
-                                <i class="fas fa-image"></i>
-                                <span>42,6% imagens</span>
-                            </div>
-                            <div class="stat-item">
-                                <i class="fas fa-exclamation-circle"></i>
-                                <span>3 regressões</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="ranking-card rank-2">
-                    <div class="rank-badge silver">
-                        <i class="fas fa-medal"></i>
-                        <span>2º</span>
-                    </div>
-                    <div class="rank-content">
-                        <h3>Barra Mar</h3>
-                        <div class="rank-score">
-                            <div class="score-value">97,1%</div>
-                            <div class="score-rating">
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="far fa-star"></i>
-                                <span>8/10</span>
-                            </div>
-                        </div>
-                        <div class="rank-stats">
-                            <div class="stat-item">
-                                <i class="fas fa-check"></i>
-                                <span>2.026 matches</span>
-                            </div>
-                            <div class="stat-item">
-                                <i class="fas fa-image"></i>
-                                <span>74,0% imagens</span>
-                            </div>
-                            <div class="stat-item critical">
-                                <i class="fas fa-exclamation-triangle"></i>
-                                <span>52 regressões</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="ranking-card rank-3">
-                    <div class="rank-badge bronze">
-                        <i class="fas fa-award"></i>
-                        <span>4º</span>
-                    </div>
-                    <div class="rank-content">
-                        <h3>Altavistta</h3>
-                        <div class="rank-score">
-                            <div class="score-value">96,7%</div>
-                            <div class="score-rating">
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="far fa-star"></i>
-                                <span>8/10</span>
-                            </div>
-                        </div>
-                        <div class="rank-stats">
-                            <div class="stat-item">
-                                <i class="fas fa-check"></i>
-                                <span>630 matches</span>
-                            </div>
-                            <div class="stat-item">
-                                <i class="fas fa-image"></i>
-                                <span>79,8% imagens</span>
-                            </div>
-                            <div class="stat-item warning">
-                                <i class="fas fa-exclamation-triangle"></i>
-                                <span>21 regressões</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="ranking-card rank-3">
-                    <div class="rank-badge bronze">
-                        <i class="fas fa-award"></i>
-                        <span>5º</span>
-                    </div>
-                    <div class="rank-content">
-                        <h3>Recanto</h3>
-                        <div class="rank-score">
-                            <div class="score-value">96,2%</div>
-                            <div class="score-rating">
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="far fa-star"></i>
-                                <span>8/10</span>
-                            </div>
-                        </div>
-                        <div class="rank-stats">
-                            <div class="stat-item">
-                                <i class="fas fa-check"></i>
-                                <span>182 matches</span>
-                            </div>
-                            <div class="stat-item success">
-                                <i class="fas fa-image"></i>
-                                <span>95,8% imagens</span>
-                            </div>
-                            <div class="stat-item">
-                                <i class="fas fa-exclamation-circle"></i>
-                                <span>2 regressões</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Charts Section -->
-    <section class="charts-section">
-        <div class="container">
-            <div class="section-header">
-                <h2 class="section-title">
-                    <i class="fas fa-chart-pie"></i>
-                    Análise Visual dos Dados
-                </h2>
-                <p class="section-subtitle">Gráficos interativos para melhor compreensão</p>
-            </div>
-
-            <div class="charts-grid">
-                <div class="chart-card">
-                    <div class="chart-header">
-                        <h3>Distribuição de Divergências</h3>
-                        <p>Total de 459 divergências analisadas</p>
-                    </div>
-                    <div class="chart-container" style="height: 300px;">
-                        <canvas id="divergenciasChart"></canvas>
-                    </div>
-                </div>
-
-                <div class="chart-card">
-                    <div class="chart-header">
-                        <h3>Cobertura de Imagens por Bairro</h3>
-                        <p>Percentual de imóveis com imagens</p>
-                    </div>
-                    <div class="chart-container" style="height: 300px;">
-                        <canvas id="imagensChart"></canvas>
-                    </div>
-                </div>
-
-                <div class="chart-card full-width">
-                    <div class="chart-header">
-                        <h3>Comparativo de Consistência por Bairro</h3>
-                        <p>Análise detalhada dos registros</p>
-                    </div>
-                    <div class="chart-container" style="height: 400px;">
-                        <canvas id="consistenciaChart"></canvas>
-                    </div>
+                <div class="ranking-chart">
+                    <h3>Comparativo de Consistência</h3>
+                    <canvas id="rankingChart" height="350"></canvas>
                 </div>
             </div>
         </div>
     </section>
 
     <!-- Detailed Analysis Section -->
-    <section class="analysis-section">
+    <section id="analise">
         <div class="container">
             <div class="section-header">
-                <h2 class="section-title">
-                    <i class="fas fa-search"></i>
-                    Análise Detalhada por Bairro
-                </h2>
-                <p class="section-subtitle">Informações completas de cada localidade</p>
+                <div class="section-label">Detalhamento</div>
+                <h2 class="section-title">Análise por Bairro</h2>
+                <p class="section-desc">Clique em um bairro para ver métricas detalhadas, tipos de divergência e avaliação técnica.</p>
             </div>
 
-            <div class="analysis-accordion">
-                <!-- Arquipélago do Sol -->
-                <div class="accordion-item active">
-                    <div class="accordion-header">
-                        <div class="accordion-title">
-                            <i class="fas fa-trophy"></i>
-                            <h3>Arquipélago do Sol</h3>
-                            <span class="badge success">99,0%</span>
-                        </div>
-                        <i class="fas fa-chevron-down"></i>
+            <div class="analysis-tabs">
+                <button class="analysis-tab active" data-tab="arquipelago">🥇 Arquipélago do Sol</button>
+                <button class="analysis-tab" data-tab="praiabon">🥈 Praia Bonita</button>
+                <button class="analysis-tab" data-tab="barramar">🥈 Barra Mar</button>
+                <button class="analysis-tab" data-tab="altavistta">🥈 Altavistta</button>
+                <button class="analysis-tab" data-tab="recanto">🥈 Recanto</button>
+            </div>
+
+            <!-- Arquipélago do Sol -->
+            <div class="analysis-content active" id="arquipelago">
+                <div class="analysis-grid">
+                    <div class="analysis-card">
+                        <h4>Total Planurbi</h4>
+                        <div class="value">438</div>
+                        <div class="detail">registros na base</div>
                     </div>
-                    <div class="accordion-content">
-                        <div class="detail-grid">
-                            <div class="detail-card">
-                                <div class="detail-icon"><i class="fas fa-database"></i></div>
-                                <div class="detail-info">
-                                    <div class="detail-value">438 / 482</div>
-                                    <div class="detail-label">Planurbi / Kalana</div>
-                                </div>
-                            </div>
-                            <div class="detail-card">
-                                <div class="detail-icon"><i class="fas fa-link"></i></div>
-                                <div class="detail-info">
-                                    <div class="detail-value">388</div>
-                                    <div class="detail-label">Matches (80,5%)</div>
-                                </div>
-                            </div>
-                            <div class="detail-card">
-                                <div class="detail-icon"><i class="fas fa-check-circle"></i></div>
-                                <div class="detail-info">
-                                    <div class="detail-value">320</div>
-                                    <div class="detail-label">Tipos Iguais (82,5%)</div>
-                                </div>
-                            </div>
-                            <div class="detail-card">
-                                <div class="detail-icon success"><i class="fas fa-arrow-up"></i></div>
-                                <div class="detail-info">
-                                    <div class="detail-value">64</div>
-                                    <div class="detail-label">Atualizações T→P (16,5%)</div>
-                                </div>
-                            </div>
-                            <div class="detail-card">
-                                <div class="detail-icon critical"><i class="fas fa-arrow-down"></i></div>
-                                <div class="detail-info">
-                                    <div class="detail-value">2</div>
-                                    <div class="detail-label">Regressões P→T (0,5%)</div>
-                                </div>
-                            </div>
-                            <div class="detail-card">
-                                <div class="detail-icon"><i class="fas fa-image"></i></div>
-                                <div class="detail-info">
-                                    <div class="detail-value">435 / 438</div>
-                                    <div class="detail-label">Imagens (99,3%)</div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="detail-footer">
-                            <div class="footer-badge gold">
-                                <i class="fas fa-star"></i>
-                                <span>EXCELENTE - Melhor bairro em todos os quesitos</span>
-                            </div>
-                        </div>
+                    <div class="analysis-card">
+                        <h4>Total Kalana</h4>
+                        <div class="value">482</div>
+                        <div class="detail">registros na base</div>
+                    </div>
+                    <div class="analysis-card">
+                        <h4>Taxa de Match</h4>
+                        <div class="value" style="color: var(--success);">80,5%</div>
+                        <div class="detail">388 correspondências</div>
                     </div>
                 </div>
 
-                <!-- Praia Bonita -->
-                <div class="accordion-item">
-                    <div class="accordion-header">
-                        <div class="accordion-title">
-                            <i class="fas fa-umbrella-beach"></i>
-                            <h3>Praia Bonita</h3>
-                            <span class="badge success">97,1%</span>
-                        </div>
-                        <i class="fas fa-chevron-down"></i>
+                <table class="divergence-table">
+                    <thead>
+                        <tr>
+                            <th>Tipo de Divergência</th>
+                            <th>Quantidade</th>
+                            <th>Percentual</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>✅ OK (tipos iguais)</td>
+                            <td><strong>320</strong></td>
+                            <td>82,5%</td>
+                            <td><span class="status-badge ok">Consistente</span></td>
+                        </tr>
+                        <tr>
+                            <td>✅ Atualizações T→P</td>
+                            <td><strong>64</strong></td>
+                            <td>16,5%</td>
+                            <td><span class="status-badge ok">Normal</span></td>
+                        </tr>
+                        <tr>
+                            <td>🔴 Regressões P→T</td>
+                            <td><strong>2</strong></td>
+                            <td>0,5%</td>
+                            <td><span class="status-badge critical">Investigar</span></td>
+                        </tr>
+                        <tr>
+                            <td>⚠️ Outros</td>
+                            <td><strong>2</strong></td>
+                            <td>0,5%</td>
+                            <td><span class="status-badge warning">Especial</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div class="analysis-grid" style="margin-top: 24px;">
+                    <div class="analysis-card" style="background: linear-gradient(135deg, var(--bg-card), rgba(76, 175, 80, 0.1));">
+                        <h4>📷 Cobertura de Imagens</h4>
+                        <div class="value" style="color: var(--success);">99,3%</div>
+                        <div class="detail">435 com imagem / 3 sem</div>
                     </div>
-                    <div class="accordion-content">
-                        <div class="detail-grid">
-                            <div class="detail-card">
-                                <div class="detail-icon"><i class="fas fa-database"></i></div>
-                                <div class="detail-info">
-                                    <div class="detail-value">251 / 262</div>
-                                    <div class="detail-label">Planurbi / Kalana</div>
-                                </div>
-                            </div>
-                            <div class="detail-card">
-                                <div class="detail-icon"><i class="fas fa-link"></i></div>
-                                <div class="detail-info">
-                                    <div class="detail-value">242</div>
-                                    <div class="detail-label">Matches (92,4%)</div>
-                                </div>
-                            </div>
-                            <div class="detail-card">
-                                <div class="detail-icon"><i class="fas fa-check-circle"></i></div>
-                                <div class="detail-info">
-                                    <div class="detail-value">224</div>
-                                    <div class="detail-label">Tipos Iguais (92,6%)</div>
-                                </div>
-                            </div>
-                            <div class="detail-card">
-                                <div class="detail-icon success"><i class="fas fa-arrow-up"></i></div>
-                                <div class="detail-info">
-                                    <div class="detail-value">11</div>
-                                    <div class="detail-label">Atualizações T→P (4,5%)</div>
-                                </div>
-                            </div>
-                            <div class="detail-card">
-                                <div class="detail-icon warning"><i class="fas fa-arrow-down"></i></div>
-                                <div class="detail-info">
-                                    <div class="detail-value">3</div>
-                                    <div class="detail-label">Regressões P→T (1,2%)</div>
-                                </div>
-                            </div>
-                            <div class="detail-card">
-                                <div class="detail-icon critical"><i class="fas fa-image"></i></div>
-                                <div class="detail-info">
-                                    <div class="detail-value">107 / 251</div>
-                                    <div class="detail-label">Imagens (42,6%)</div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="detail-footer">
-                            <div class="footer-badge warning">
-                                <i class="fas fa-exclamation-triangle"></i>
-                                <span>MUITO BOM - Precisa urgente de 144 imagens</span>
-                            </div>
-                        </div>
+                    <div class="analysis-card">
+                        <h4>Só Planurbi</h4>
+                        <div class="value">50</div>
+                        <div class="detail">11,4% do bairro</div>
+                    </div>
+                    <div class="analysis-card">
+                        <h4>Só Kalana</h4>
+                        <div class="value">94</div>
+                        <div class="detail">19,5% do bairro</div>
                     </div>
                 </div>
 
-                <!-- Barra Mar -->
-                <div class="accordion-item">
-                    <div class="accordion-header">
-                        <div class="accordion-title">
-                            <i class="fas fa-water"></i>
-                            <h3>Barra Mar</h3>
-                            <span class="badge success">97,1%</span>
-                        </div>
-                        <i class="fas fa-chevron-down"></i>
+                <div style="background: var(--success-bg); border: 1px solid rgba(76, 175, 80, 0.3); border-radius: 12px; padding: 20px; margin-top: 24px;">
+                    <strong style="color: var(--success);">🥇 AVALIAÇÃO: EXCELENTE</strong>
+                    <p style="margin-top: 8px; color: var(--text-secondary);">Melhor bairro em todos os quesitos. Referência para os demais bairros.</p>
+                </div>
+            </div>
+
+            <!-- Praia Bonita -->
+            <div class="analysis-content" id="praiabon">
+                <div class="analysis-grid">
+                    <div class="analysis-card">
+                        <h4>Total Planurbi</h4>
+                        <div class="value">251</div>
+                        <div class="detail">registros na base</div>
                     </div>
-                    <div class="accordion-content">
-                        <div class="detail-grid">
-                            <div class="detail-card">
-                                <div class="detail-icon"><i class="fas fa-database"></i></div>
-                                <div class="detail-info">
-                                    <div class="detail-value">2.431 / 2.087</div>
-                                    <div class="detail-label">Planurbi / Kalana</div>
-                                </div>
-                            </div>
-                            <div class="detail-card">
-                                <div class="detail-icon"><i class="fas fa-link"></i></div>
-                                <div class="detail-info">
-                                    <div class="detail-value">2.026</div>
-                                    <div class="detail-label">Matches (97,1%)</div>
-                                </div>
-                            </div>
-                            <div class="detail-card">
-                                <div class="detail-icon"><i class="fas fa-check-circle"></i></div>
-                                <div class="detail-info">
-                                    <div class="detail-value">1.754</div>
-                                    <div class="detail-label">Tipos Iguais (86,6%)</div>
-                                </div>
-                            </div>
-                            <div class="detail-card">
-                                <div class="detail-icon success"><i class="fas fa-arrow-up"></i></div>
-                                <div class="detail-info">
-                                    <div class="detail-value">214</div>
-                                    <div class="detail-label">Atualizações T→P (10,6%)</div>
-                                </div>
-                            </div>
-                            <div class="detail-card">
-                                <div class="detail-icon critical"><i class="fas fa-arrow-down"></i></div>
-                                <div class="detail-info">
-                                    <div class="detail-value">52</div>
-                                    <div class="detail-label">Regressões P→T (2,6%)</div>
-                                </div>
-                            </div>
-                            <div class="detail-card">
-                                <div class="detail-icon"><i class="fas fa-image"></i></div>
-                                <div class="detail-info">
-                                    <div class="detail-value">1.799 / 2.431</div>
-                                    <div class="detail-label">Imagens (74,0%)</div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="detail-footer">
-                            <div class="footer-badge critical">
-                                <i class="fas fa-exclamation-circle"></i>
-                                <span>MUITO BOM - Concentra 65% das regressões críticas (52 casos)</span>
-                            </div>
-                        </div>
+                    <div class="analysis-card">
+                        <h4>Total Kalana</h4>
+                        <div class="value">262</div>
+                        <div class="detail">registros na base</div>
+                    </div>
+                    <div class="analysis-card">
+                        <h4>Taxa de Match</h4>
+                        <div class="value" style="color: var(--success);">92,4%</div>
+                        <div class="detail">242 correspondências</div>
                     </div>
                 </div>
 
-                <!-- Altavistta -->
-                <div class="accordion-item">
-                    <div class="accordion-header">
-                        <div class="accordion-title">
-                            <i class="fas fa-building"></i>
-                            <h3>Altavistta</h3>
-                            <span class="badge success">96,7%</span>
-                        </div>
-                        <i class="fas fa-chevron-down"></i>
+                <table class="divergence-table">
+                    <thead>
+                        <tr>
+                            <th>Tipo de Divergência</th>
+                            <th>Quantidade</th>
+                            <th>Percentual</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>✅ OK (tipos iguais)</td>
+                            <td><strong>224</strong></td>
+                            <td>92,6%</td>
+                            <td><span class="status-badge ok">Consistente</span></td>
+                        </tr>
+                        <tr>
+                            <td>✅ Atualizações T→P</td>
+                            <td><strong>11</strong></td>
+                            <td>4,5%</td>
+                            <td><span class="status-badge ok">Normal</span></td>
+                        </tr>
+                        <tr>
+                            <td>🔴 Regressões P→T</td>
+                            <td><strong>3</strong></td>
+                            <td>1,2%</td>
+                            <td><span class="status-badge critical">Investigar</span></td>
+                        </tr>
+                        <tr>
+                            <td>🔴 Conflito de Bairro</td>
+                            <td><strong>3</strong></td>
+                            <td>1,2%</td>
+                            <td><span class="status-badge critical">Corrigir</span></td>
+                        </tr>
+                        <tr>
+                            <td>⚠️ Outros</td>
+                            <td><strong>1</strong></td>
+                            <td>0,4%</td>
+                            <td><span class="status-badge warning">Especial</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div class="analysis-grid" style="margin-top: 24px;">
+                    <div class="analysis-card" style="background: linear-gradient(135deg, var(--bg-card), rgba(255, 82, 82, 0.1));">
+                        <h4>📷 Cobertura de Imagens</h4>
+                        <div class="value" style="color: var(--error);">42,6%</div>
+                        <div class="detail">107 com imagem / 144 sem 🔴</div>
                     </div>
-                    <div class="accordion-content">
-                        <div class="detail-grid">
-                            <div class="detail-card">
-                                <div class="detail-icon"><i class="fas fa-database"></i></div>
-                                <div class="detail-info">
-                                    <div class="detail-value">921 / 686</div>
-                                    <div class="detail-label">Planurbi / Kalana</div>
-                                </div>
-                            </div>
-                            <div class="detail-card">
-                                <div class="detail-icon"><i class="fas fa-link"></i></div>
-                                <div class="detail-info">
-                                    <div class="detail-value">630</div>
-                                    <div class="detail-label">Matches (91,8%)</div>
-                                </div>
-                            </div>
-                            <div class="detail-card">
-                                <div class="detail-icon"><i class="fas fa-check-circle"></i></div>
-                                <div class="detail-info">
-                                    <div class="detail-value">549</div>
-                                    <div class="detail-label">Tipos Iguais (87,1%)</div>
-                                </div>
-                            </div>
-                            <div class="detail-card">
-                                <div class="detail-icon success"><i class="fas fa-arrow-up"></i></div>
-                                <div class="detail-info">
-                                    <div class="detail-value">60</div>
-                                    <div class="detail-label">Atualizações T→P (9,5%)</div>
-                                </div>
-                            </div>
-                            <div class="detail-card">
-                                <div class="detail-icon warning"><i class="fas fa-arrow-down"></i></div>
-                                <div class="detail-info">
-                                    <div class="detail-value">21</div>
-                                    <div class="detail-label">Regressões P→T (3,3%)</div>
-                                </div>
-                            </div>
-                            <div class="detail-card">
-                                <div class="detail-icon"><i class="fas fa-image"></i></div>
-                                <div class="detail-info">
-                                    <div class="detail-value">735 / 921</div>
-                                    <div class="detail-label">Imagens (79,8%)</div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="detail-footer">
-                            <div class="footer-badge warning">
-                                <i class="fas fa-info-circle"></i>
-                                <span>BOM - Segunda maior concentração de regressões (21 casos)</span>
-                            </div>
-                        </div>
+                    <div class="analysis-card">
+                        <h4>Só Planurbi</h4>
+                        <div class="value">9</div>
+                        <div class="detail">3,6% do bairro</div>
+                    </div>
+                    <div class="analysis-card">
+                        <h4>Só Kalana</h4>
+                        <div class="value">20</div>
+                        <div class="detail">7,6% do bairro</div>
                     </div>
                 </div>
 
-                <!-- Recanto -->
-                <div class="accordion-item">
-                    <div class="accordion-header">
-                        <div class="accordion-title">
-                            <i class="fas fa-home"></i>
-                            <h3>Recanto</h3>
-                            <span class="badge success">96,2%</span>
-                        </div>
-                        <i class="fas fa-chevron-down"></i>
+                <div style="background: var(--success-bg); border: 1px solid rgba(76, 175, 80, 0.3); border-radius: 12px; padding: 20px; margin-top: 24px;">
+                    <strong style="color: var(--success);">📌 CORREÇÃO APLICADA</strong>
+                    <p style="margin-top: 8px; color: var(--text-secondary);">BARRABALI_CONDOMINIO: 132 registros corrigidos (RECANTO → PRAIA BONITA). Impacto: De 0% para 100% de consistência neste arquivo.</p>
+                </div>
+
+                <div style="background: var(--error-bg); border: 1px solid rgba(255, 82, 82, 0.3); border-radius: 12px; padding: 20px; margin-top: 16px;">
+                    <strong style="color: var(--error);">⚠️ ATENÇÃO: COBERTURA DE IMAGENS CRÍTICA</strong>
+                    <p style="margin-top: 8px; color: var(--text-secondary);">Necessário campanha urgente para coletar 144 imagens faltantes. Arquivos críticos: BARRABALI (0/136) e PRAIA_BONITA.</p>
+                </div>
+            </div>
+
+            <!-- Barra Mar -->
+            <div class="analysis-content" id="barramar">
+                <div class="analysis-grid">
+                    <div class="analysis-card">
+                        <h4>Total Planurbi</h4>
+                        <div class="value">2.431</div>
+                        <div class="detail">registros na base</div>
                     </div>
-                    <div class="accordion-content">
-                        <div class="detail-grid">
-                            <div class="detail-card">
-                                <div class="detail-icon"><i class="fas fa-database"></i></div>
-                                <div class="detail-info">
-                                    <div class="detail-value">192 / 338</div>
-                                    <div class="detail-label">Planurbi / Kalana</div>
-                                </div>
-                            </div>
-                            <div class="detail-card">
-                                <div class="detail-icon"><i class="fas fa-link"></i></div>
-                                <div class="detail-info">
-                                    <div class="detail-value">182</div>
-                                    <div class="detail-label">Matches (53,8%)</div>
-                                </div>
-                            </div>
-                            <div class="detail-card">
-                                <div class="detail-icon"><i class="fas fa-check-circle"></i></div>
-                                <div class="detail-info">
-                                    <div class="detail-value">153</div>
-                                    <div class="detail-label">Tipos Iguais (84,1%)</div>
-                                </div>
-                            </div>
-                            <div class="detail-card">
-                                <div class="detail-icon success"><i class="fas fa-arrow-up"></i></div>
-                                <div class="detail-info">
-                                    <div class="detail-value">22</div>
-                                    <div class="detail-label">Atualizações T→P (12,1%)</div>
-                                </div>
-                            </div>
-                            <div class="detail-card">
-                                <div class="detail-icon"><i class="fas fa-arrow-down"></i></div>
-                                <div class="detail-info">
-                                    <div class="detail-value">2</div>
-                                    <div class="detail-label">Regressões P→T (1,1%)</div>
-                                </div>
-                            </div>
-                            <div class="detail-card">
-                                <div class="detail-icon success"><i class="fas fa-image"></i></div>
-                                <div class="detail-info">
-                                    <div class="detail-value">184 / 192</div>
-                                    <div class="detail-label">Imagens (95,8%)</div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="detail-footer">
-                            <div class="footer-badge info">
-                                <i class="fas fa-info-circle"></i>
-                                <span>BOM - Baixa taxa de match (53,8%) mas excelente cobertura de imagens</span>
-                            </div>
-                        </div>
+                    <div class="analysis-card">
+                        <h4>Total Kalana</h4>
+                        <div class="value">2.087</div>
+                        <div class="detail">registros na base</div>
                     </div>
+                    <div class="analysis-card">
+                        <h4>Taxa de Match</h4>
+                        <div class="value" style="color: var(--success);">97,1%</div>
+                        <div class="detail">2.026 correspondências</div>
+                    </div>
+                </div>
+
+                <table class="divergence-table">
+                    <thead>
+                        <tr>
+                            <th>Tipo de Divergência</th>
+                            <th>Quantidade</th>
+                            <th>Percentual</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>✅ OK (tipos iguais)</td>
+                            <td><strong>1.754</strong></td>
+                            <td>86,6%</td>
+                            <td><span class="status-badge ok">Consistente</span></td>
+                        </tr>
+                        <tr>
+                            <td>✅ Atualizações T→P</td>
+                            <td><strong>214</strong></td>
+                            <td>10,6%</td>
+                            <td><span class="status-badge ok">Normal</span></td>
+                        </tr>
+                        <tr>
+                            <td>🔴 Regressões P→T</td>
+                            <td><strong>52</strong></td>
+                            <td>2,6%</td>
+                            <td><span class="status-badge critical">⚠️ MAIOR CONCENTRAÇÃO</span></td>
+                        </tr>
+                        <tr>
+                            <td>🔴 Conflito de Bairro</td>
+                            <td><strong>1</strong></td>
+                            <td>0,0%</td>
+                            <td><span class="status-badge warning">Corrigir</span></td>
+                        </tr>
+                        <tr>
+                            <td>⚠️ Outros</td>
+                            <td><strong>5</strong></td>
+                            <td>0,2%</td>
+                            <td><span class="status-badge warning">Especial</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div class="analysis-grid" style="margin-top: 24px;">
+                    <div class="analysis-card">
+                        <h4>📷 Cobertura de Imagens</h4>
+                        <div class="value" style="color: var(--warning);">74,0%</div>
+                        <div class="detail">1.799 com imagem / 632 sem</div>
+                    </div>
+                    <div class="analysis-card">
+                        <h4>Só Planurbi</h4>
+                        <div class="value">405</div>
+                        <div class="detail">16,7% do bairro</div>
+                    </div>
+                    <div class="analysis-card">
+                        <h4>Só Kalana</h4>
+                        <div class="value">61</div>
+                        <div class="detail">2,9% do bairro</div>
+                    </div>
+                </div>
+
+                <div style="background: var(--error-bg); border: 1px solid rgba(255, 82, 82, 0.3); border-radius: 12px; padding: 20px; margin-top: 24px;">
+                    <strong style="color: var(--error);">🔴 ATENÇÃO: MAIOR CONCENTRAÇÃO DE REGRESSÕES</strong>
+                    <p style="margin-top: 8px; color: var(--text-secondary);">
+                        • Concentra <strong>52 das 80 regressões P→T</strong> (65% do total)<br>
+                        • Arquivos críticos: SETOR_F (26), SETOR_D (15), SETOR_A (7)<br>
+                        • Maior volume de dados: 2.026 matches (58,4% do total auditado)
+                    </p>
+                </div>
+
+                <div style="background: var(--success-bg); border: 1px solid rgba(76, 175, 80, 0.3); border-radius: 12px; padding: 20px; margin-top: 16px;">
+                    <strong style="color: var(--success);">📌 CORREÇÃO APLICADA</strong>
+                    <p style="margin-top: 8px; color: var(--text-secondary);">BARRAMAR_SETOR_C: 17 registros normalizados ("BARRAMAR" → "BARRA MAR").</p>
+                </div>
+            </div>
+
+            <!-- Altavistta -->
+            <div class="analysis-content" id="altavistta">
+                <div class="analysis-grid">
+                    <div class="analysis-card">
+                        <h4>Total Planurbi</h4>
+                        <div class="value">921</div>
+                        <div class="detail">registros na base</div>
+                    </div>
+                    <div class="analysis-card">
+                        <h4>Total Kalana</h4>
+                        <div class="value">686</div>
+                        <div class="detail">registros na base</div>
+                    </div>
+                    <div class="analysis-card">
+                        <h4>Taxa de Match</h4>
+                        <div class="value" style="color: var(--success);">91,8%</div>
+                        <div class="detail">630 correspondências</div>
+                    </div>
+                </div>
+
+                <table class="divergence-table">
+                    <thead>
+                        <tr>
+                            <th>Tipo de Divergência</th>
+                            <th>Quantidade</th>
+                            <th>Percentual</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>✅ OK (tipos iguais)</td>
+                            <td><strong>549</strong></td>
+                            <td>87,1%</td>
+                            <td><span class="status-badge ok">Consistente</span></td>
+                        </tr>
+                        <tr>
+                            <td>✅ Atualizações T→P</td>
+                            <td><strong>60</strong></td>
+                            <td>9,5%</td>
+                            <td><span class="status-badge ok">Normal</span></td>
+                        </tr>
+                        <tr>
+                            <td>🔴 Regressões P→T</td>
+                            <td><strong>21</strong></td>
+                            <td>3,3%</td>
+                            <td><span class="status-badge critical">Investigar</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div class="analysis-grid" style="margin-top: 24px;">
+                    <div class="analysis-card">
+                        <h4>📷 Cobertura de Imagens</h4>
+                        <div class="value" style="color: var(--warning);">79,8%</div>
+                        <div class="detail">735 com imagem / 186 sem</div>
+                    </div>
+                    <div class="analysis-card">
+                        <h4>Só Planurbi</h4>
+                        <div class="value" style="color: var(--warning);">291</div>
+                        <div class="detail">31,6% do bairro ⚠️</div>
+                    </div>
+                    <div class="analysis-card">
+                        <h4>Só Kalana</h4>
+                        <div class="value">56</div>
+                        <div class="detail">8,2% do bairro</div>
+                    </div>
+                </div>
+
+                <div style="background: var(--warning-bg); border: 1px solid rgba(255, 179, 0, 0.3); border-radius: 12px; padding: 20px; margin-top: 24px;">
+                    <strong style="color: var(--warning);">⚠️ ATENÇÃO</strong>
+                    <p style="margin-top: 8px; color: var(--text-secondary);">
+                        • Segunda maior concentração de regressões: <strong>21 casos</strong> (26% do total)<br>
+                        • 291 registros só no Planurbi requerem investigação
+                    </p>
+                </div>
+            </div>
+
+            <!-- Recanto -->
+            <div class="analysis-content" id="recanto">
+                <div class="analysis-grid">
+                    <div class="analysis-card">
+                        <h4>Total Planurbi</h4>
+                        <div class="value">192</div>
+                        <div class="detail">registros na base</div>
+                    </div>
+                    <div class="analysis-card">
+                        <h4>Total Kalana</h4>
+                        <div class="value">338</div>
+                        <div class="detail">registros na base</div>
+                    </div>
+                    <div class="analysis-card">
+                        <h4>Taxa de Match</h4>
+                        <div class="value" style="color: var(--warning);">53,8%</div>
+                        <div class="detail">182 correspondências ⚠️</div>
+                    </div>
+                </div>
+
+                <table class="divergence-table">
+                    <thead>
+                        <tr>
+                            <th>Tipo de Divergência</th>
+                            <th>Quantidade</th>
+                            <th>Percentual</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>✅ OK (tipos iguais)</td>
+                            <td><strong>153</strong></td>
+                            <td>84,1%</td>
+                            <td><span class="status-badge ok">Consistente</span></td>
+                        </tr>
+                        <tr>
+                            <td>✅ Atualizações T→P</td>
+                            <td><strong>22</strong></td>
+                            <td>12,1%</td>
+                            <td><span class="status-badge ok">Normal</span></td>
+                        </tr>
+                        <tr>
+                            <td>🔴 Regressões P→T</td>
+                            <td><strong>2</strong></td>
+                            <td>1,1%</td>
+                            <td><span class="status-badge critical">Investigar</span></td>
+                        </tr>
+                        <tr>
+                            <td>🔴 Conflito de Bairro</td>
+                            <td><strong>5</strong></td>
+                            <td>2,7%</td>
+                            <td><span class="status-badge critical">Corrigir</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div class="analysis-grid" style="margin-top: 24px;">
+                    <div class="analysis-card" style="background: linear-gradient(135deg, var(--bg-card), rgba(76, 175, 80, 0.1));">
+                        <h4>📷 Cobertura de Imagens</h4>
+                        <div class="value" style="color: var(--success);">95,8%</div>
+                        <div class="detail">184 com imagem / 8 sem</div>
+                    </div>
+                    <div class="analysis-card">
+                        <h4>Só Planurbi</h4>
+                        <div class="value">10</div>
+                        <div class="detail">5,2% do bairro</div>
+                    </div>
+                    <div class="analysis-card">
+                        <h4>Só Kalana</h4>
+                        <div class="value" style="color: var(--error);">156</div>
+                        <div class="detail">46,2% do bairro 🔴</div>
+                    </div>
+                </div>
+
+                <div style="background: var(--warning-bg); border: 1px solid rgba(255, 179, 0, 0.3); border-radius: 12px; padding: 20px; margin-top: 24px;">
+                    <strong style="color: var(--warning);">⚠️ ATENÇÃO: BAIXA TAXA DE MATCH</strong>
+                    <p style="margin-top: 8px; color: var(--text-secondary);">
+                        156 registros só na Kalana (46,2%) — maior percentual de todos os bairros.<br>
+                        Possível causa: Dados antigos não migrados para Planurbi.
+                    </p>
                 </div>
             </div>
         </div>
     </section>
 
     <!-- Critical Issues Section -->
-    <section class="issues-section">
+    <section id="criticos" style="background: var(--bg-surface);">
         <div class="container">
             <div class="section-header">
-                <h2 class="section-title">
-                    <i class="fas fa-exclamation-circle"></i>
-                    Problemas Críticos Identificados
-                </h2>
-                <p class="section-subtitle">Questões que requerem atenção imediata</p>
+                <div class="section-label">Atenção</div>
+                <h2 class="section-title">Problemas Críticos Identificados</h2>
+                <p class="section-desc">Itens que requerem investigação e ação imediata para garantir a integridade dos dados.</p>
             </div>
 
-            <div class="issues-grid">
-                <div class="issue-card critical">
-                    <div class="issue-header">
-                        <div class="issue-icon">
-                            <i class="fas fa-exclamation-triangle"></i>
-                        </div>
-                        <div class="issue-badge">CRÍTICO</div>
-                    </div>
-                    <h3>80 Regressões P→T</h3>
-                    <p>Imóveis cadastrados como Edificação (P) na Kalana aparecem como Terreno (T) no Planurbi</p>
-                    <div class="issue-stats">
-                        <div class="stat">
-                            <span class="stat-value">52</span>
-                            <span class="stat-label">Barra Mar (65%)</span>
-                        </div>
-                        <div class="stat">
-                            <span class="stat-value">21</span>
-                            <span class="stat-label">Altavistta (26%)</span>
-                        </div>
-                        <div class="stat">
-                            <span class="stat-value">7</span>
-                            <span class="stat-label">Outros (9%)</span>
-                        </div>
-                    </div>
-                    <div class="issue-action">
-                        <i class="fas fa-search"></i>
-                        <span>Investigação urgente com verificação de imagens</span>
+            <div class="critical-section">
+                <div class="critical-header">
+                    <div class="critical-icon">🚨</div>
+                    <div>
+                        <h3>80 Regressões P→T Detectadas</h3>
+                        <p>Edificações cadastradas como terrenos — situação logicamente impossível sem demolição</p>
                     </div>
                 </div>
 
-                <div class="issue-card warning">
-                    <div class="issue-header">
-                        <div class="issue-icon">
-                            <i class="fas fa-image"></i>
-                        </div>
-                        <div class="issue-badge">ALTA</div>
-                    </div>
-                    <h3>144 Imagens Faltantes</h3>
-                    <p>Praia Bonita possui apenas 42,6% de cobertura de imagens - o pior índice entre todos os bairros</p>
-                    <div class="issue-stats">
-                        <div class="stat">
-                            <span class="stat-value">107</span>
-                            <span class="stat-label">Com imagem</span>
-                        </div>
-                        <div class="stat">
-                            <span class="stat-value">144</span>
-                            <span class="stat-label">Sem imagem</span>
-                        </div>
-                        <div class="stat">
-                            <span class="stat-value">42,6%</span>
-                            <span class="stat-label">Cobertura</span>
+                <div class="critical-grid">
+                    <div class="critical-card high">
+                        <h4>Barra Mar</h4>
+                        <div class="number">52</div>
+                        <div class="description">
+                            65% do total. Arquivos críticos:<br>
+                            • SETOR_F: 26 casos<br>
+                            • SETOR_D: 15 casos<br>
+                            • SETOR_A: 7 casos
                         </div>
                     </div>
-                    <div class="issue-action">
-                        <i class="fas fa-camera"></i>
-                        <span>Campanha urgente de coleta de imagens</span>
-                    </div>
-                </div>
-
-                <div class="issue-card medium">
-                    <div class="issue-header">
-                        <div class="issue-icon">
-                            <i class="fas fa-unlink"></i>
-                        </div>
-                        <div class="issue-badge">MÉDIA</div>
-                    </div>
-                    <h3>1.152 Registros Sem Match</h3>
-                    <p>Registros que existem em apenas uma das bases de dados precisam ser sincronizados</p>
-                    <div class="issue-stats">
-                        <div class="stat">
-                            <span class="stat-value">765</span>
-                            <span class="stat-label">Só Planurbi (18,1%)</span>
-                        </div>
-                        <div class="stat">
-                            <span class="stat-value">387</span>
-                            <span class="stat-label">Só Kalana (10,0%)</span>
-                        </div>
-                        <div class="stat">
-                            <span class="stat-value">1.152</span>
-                            <span class="stat-label">Total</span>
+                    <div class="critical-card high">
+                        <h4>Altavistta</h4>
+                        <div class="number">21</div>
+                        <div class="description">
+                            26% do total.<br>
+                            Arquivo: ALTAVISTA.csv<br>
+                            Segunda maior concentração
                         </div>
                     </div>
-                    <div class="issue-action">
-                        <i class="fas fa-sync"></i>
-                        <span>Investigar origem e sincronizar bases</span>
+                    <div class="critical-card medium">
+                        <h4>Outros Bairros</h4>
+                        <div class="number">7</div>
+                        <div class="description">
+                            Praia Bonita: 3<br>
+                            Arquipélago do Sol: 2<br>
+                            Recanto: 2
+                        </div>
                     </div>
                 </div>
+            </div>
 
-                <div class="issue-card low">
-                    <div class="issue-header">
-                        <div class="issue-icon">
-                            <i class="fas fa-map-marked-alt"></i>
-                        </div>
-                        <div class="issue-badge">BAIXA</div>
+            <!-- Cases Examples -->
+            <div class="section-header" style="margin-top: 80px;">
+                <div class="section-label">Exemplos Reais</div>
+                <h2 class="section-title">Casos Documentados</h2>
+            </div>
+
+            <div class="cases-grid">
+                <div class="case-card">
+                    <div class="case-header">
+                        <span class="case-type critical">🔴 Regressão P→T</span>
+                        <span class="case-id">01.03.008.0303.001</span>
                     </div>
-                    <h3>9 Conflitos de Bairro</h3>
-                    <p>Imóveis cadastrados em bairros diferentes nas duas bases (apenas 0,3% dos matches)</p>
-                    <div class="issue-stats">
-                        <div class="stat">
-                            <span class="stat-value">6</span>
-                            <span class="stat-label">Barra Mar vs Recanto</span>
+                    <div class="case-details">
+                        <div class="case-detail">
+                            <div class="case-detail-label">Bairro</div>
+                            <div class="case-detail-value">ALTAVISTTA</div>
                         </div>
-                        <div class="stat">
-                            <span class="stat-value">3</span>
-                            <span class="stat-label">Outros casos</span>
+                        <div class="case-detail">
+                            <div class="case-detail-label">Arquivo</div>
+                            <div class="case-detail-value">ALTAVISTA.csv</div>
                         </div>
-                        <div class="stat">
-                            <span class="stat-value">0,3%</span>
-                            <span class="stat-label">Do total</span>
+                        <div class="case-detail">
+                            <div class="case-detail-label">Tipo Kalana</div>
+                            <div class="case-detail-value" style="color: var(--success);">P (Edificação)</div>
+                        </div>
+                        <div class="case-detail">
+                            <div class="case-detail-label">Tipo Planurbi</div>
+                            <div class="case-detail-value" style="color: var(--error);">T (Terreno)</div>
                         </div>
                     </div>
-                    <div class="issue-action">
-                        <i class="fas fa-map"></i>
-                        <span>Definir limites oficiais entre bairros</span>
+                    <div class="case-analysis">
+                        <p>🔴 <strong>Problema:</strong> Edificação na Kalana aparece como Terreno no Planurbi</p>
+                        <p>🔴 <strong>Gravidade:</strong> CRÍTICA — Edificações não viram terrenos naturalmente</p>
+                        <p>🎯 <strong>Ação:</strong> Verificar imagem e corrigir cadastro incorreto</p>
+                    </div>
+                    <a href="https://pub-4de053f15b0a42d9a5f1dbe06c5353b8.r2.dev/mkI5BNqn8xe1lQBYCxG5E+pIU34Kxyw6PMPhcHZ9xvI=.jpeg" target="_blank" class="case-link">
+                        Ver imagem do imóvel →
+                    </a>
+                </div>
+
+                <div class="case-card">
+                    <div class="case-header">
+                        <span class="case-type normal">✅ Atualização T→P</span>
+                        <span class="case-id">01.03.008.0363.001</span>
+                    </div>
+                    <div class="case-details">
+                        <div class="case-detail">
+                            <div class="case-detail-label">Bairro</div>
+                            <div class="case-detail-value">ALTAVISTTA</div>
+                        </div>
+                        <div class="case-detail">
+                            <div class="case-detail-label">Arquivo</div>
+                            <div class="case-detail-value">ALTAVISTA.csv</div>
+                        </div>
+                        <div class="case-detail">
+                            <div class="case-detail-label">Tipo Kalana</div>
+                            <div class="case-detail-value">T (Terreno)</div>
+                        </div>
+                        <div class="case-detail">
+                            <div class="case-detail-label">Tipo Planurbi</div>
+                            <div class="case-detail-value" style="color: var(--success);">P (Edificação)</div>
+                        </div>
+                    </div>
+                    <div class="case-analysis">
+                        <p>✅ <strong>Interpretação:</strong> Terreno foi CONSTRUÍDO entre os cadastros</p>
+                        <p>✅ <strong>Gravidade:</strong> NENHUMA — Evolução natural do cadastro</p>
+                        <p>🎯 <strong>Status:</strong> OK — Um dos 371 casos de atualização normal</p>
+                    </div>
+                    <a href="https://pub-4de053f15b0a42d9a5f1dbe06c5353b8.r2.dev/YSqxI2KxIB6pQZFgag7+182abO2V83rGXkAD7SN7u4U=.jpeg" target="_blank" class="case-link">
+                        Ver imagem do imóvel →
+                    </a>
+                </div>
+
+                <div class="case-card">
+                    <div class="case-header">
+                        <span class="case-type conflict">🟠 Conflito de Bairro</span>
+                        <span class="case-id">01.02.070.0265.008</span>
+                    </div>
+                    <div class="case-details">
+                        <div class="case-detail">
+                            <div class="case-detail-label">Bairro Kalana</div>
+                            <div class="case-detail-value">RECANTO</div>
+                        </div>
+                        <div class="case-detail">
+                            <div class="case-detail-label">Bairro Planurbi</div>
+                            <div class="case-detail-value">BARRA MAR</div>
+                        </div>
+                        <div class="case-detail">
+                            <div class="case-detail-label">Tipo Kalana</div>
+                            <div class="case-detail-value" style="color: var(--success);">P (Edificação)</div>
+                        </div>
+                        <div class="case-detail">
+                            <div class="case-detail-label">Tipo Planurbi</div>
+                            <div class="case-detail-value" style="color: var(--success);">P (Edificação) ✓</div>
+                        </div>
+                    </div>
+                    <div class="case-analysis">
+                        <p>🟠 <strong>Problema:</strong> Mesmo imóvel em bairros DIFERENTES nas duas bases</p>
+                        <p>🟠 <strong>Gravidade:</strong> MÉDIA — Pode indicar limite impreciso entre bairros</p>
+                        <p>🎯 <strong>Status:</strong> 1 de 9 conflitos de bairro remanescentes (0,3%)</p>
+                    </div>
+                    <a href="https://pub-4de053f15b0a42d9a5f1dbe06c5353b8.r2.dev/7gMEDpJSeOX78Dr0NywuDtdaG3dHp0crG8UMUoN3Gs8=.jpeg" target="_blank" class="case-link">
+                        Ver imagem do imóvel →
+                    </a>
+                </div>
+
+                <div class="case-card">
+                    <div class="case-header">
+                        <span class="case-type critical">🔴 Top Arquivos Críticos</span>
+                        <span class="case-id">REGRESSÕES P→T</span>
+                    </div>
+                    <div style="padding: 16px 0;">
+                        <table style="width: 100%; font-size: 0.9rem;">
+                            <tr style="border-bottom: 1px solid var(--border);">
+                                <td style="padding: 8px 0; color: var(--text-muted);">BARRAMAR_SETOR_F</td>
+                                <td style="text-align: right; font-weight: 600; color: var(--error);">26 casos</td>
+                            </tr>
+                            <tr style="border-bottom: 1px solid var(--border);">
+                                <td style="padding: 8px 0; color: var(--text-muted);">ALTAVISTA</td>
+                                <td style="text-align: right; font-weight: 600; color: var(--error);">21 casos</td>
+                            </tr>
+                            <tr style="border-bottom: 1px solid var(--border);">
+                                <td style="padding: 8px 0; color: var(--text-muted);">BARRAMAR_SETOR_D</td>
+                                <td style="text-align: right; font-weight: 600; color: var(--warning);">15 casos</td>
+                            </tr>
+                            <tr style="border-bottom: 1px solid var(--border);">
+                                <td style="padding: 8px 0; color: var(--text-muted);">BARRAMAR_SETOR_A</td>
+                                <td style="text-align: right; font-weight: 600; color: var(--warning);">7 casos</td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 8px 0; color: var(--text-muted);">PRAIA_BONITA</td>
+                                <td style="text-align: right; font-weight: 600;">3 casos</td>
+                            </tr>
+                        </table>
+                    </div>
+                    <div class="case-analysis">
+                        <p><strong>Hipótese:</strong> Erro no processo ETL/migração concentrado em arquivos específicos</p>
+                        <p><strong>Evidência:</strong> 2 arquivos = 51% dos casos</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Other Critical Issues -->
+            <div class="critical-grid" style="margin-top: 40px;">
+                <div class="critical-card medium">
+                    <h4>📷 Imagens Faltantes - Praia Bonita</h4>
+                    <div class="number">144</div>
+                    <div class="description">
+                        Apenas 42,6% de cobertura (pior bairro).<br>
+                        Arquivos críticos: BARRABALI (0/136)
+                    </div>
+                </div>
+                <div class="critical-card low">
+                    <h4>📄 Registros Sem Match</h4>
+                    <div class="number">1.152</div>
+                    <div class="description">
+                        765 só no Planurbi (18,1%)<br>
+                        387 só na Kalana (10,0%)
+                    </div>
+                </div>
+                <div class="critical-card low">
+                    <h4>🗺️ Conflitos de Bairro</h4>
+                    <div class="number">9</div>
+                    <div class="description">
+                        0,3% dos matches.<br>
+                        BARRA MAR vs RECANTO: 6 casos
                     </div>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- Timeline Section -->
-    <section class="timeline-section">
+    <!-- Diagnosis Section -->
+    <section>
         <div class="container">
             <div class="section-header">
-                <h2 class="section-title">
-                    <i class="fas fa-tasks"></i>
-                    Plano de Ação e Recomendações
-                </h2>
-                <p class="section-subtitle">Timeline de implementação das melhorias</p>
+                <div class="section-label">Diagnóstico</div>
+                <h2 class="section-title">Evolução da Auditoria</h2>
+                <p class="section-desc">Histórico de melhorias aplicadas durante o processo de auditoria.</p>
+            </div>
+
+            <div class="chart-card full-width" style="margin-bottom: 40px;">
+                <h3>📈 Evolução da Taxa de Consistência</h3>
+                <canvas id="evolutionChart" height="120"></canvas>
+            </div>
+
+            <div class="charts-grid">
+                <div class="chart-card">
+                    <h3>🔧 Correções Aplicadas</h3>
+                    <div style="display: flex; flex-direction: column; gap: 16px; margin-top: 20px;">
+                        <div style="background: var(--bg-surface); padding: 16px; border-radius: 12px; border-left: 4px solid var(--success);">
+                            <strong style="color: var(--success);">1. Normalização de Tipos</strong>
+                            <p style="font-size: 0.9rem; color: var(--text-secondary); margin-top: 8px;">
+                                "Edificação" / "Edificação em construção" → P<br>
+                                "Terreno" → T | "Ruínas" → R
+                            </p>
+                        </div>
+                        <div style="background: var(--bg-surface); padding: 16px; border-radius: 12px; border-left: 4px solid var(--accent);">
+                            <strong style="color: var(--accent);">2. Correção BARRABALI</strong>
+                            <p style="font-size: 0.9rem; color: var(--text-secondary); margin-top: 8px;">
+                                132 registros: RECANTO → PRAIA BONITA<br>
+                                <span style="color: var(--success);">Impacto: +132 registros OK</span>
+                            </p>
+                        </div>
+                        <div style="background: var(--bg-surface); padding: 16px; border-radius: 12px; border-left: 4px solid var(--warning);">
+                            <strong style="color: var(--warning);">3. Normalização BARRAMAR</strong>
+                            <p style="font-size: 0.9rem; color: var(--text-secondary); margin-top: 8px;">
+                                17 registros: "BARRAMAR" → "BARRA MAR"<br>
+                                <span style="color: var(--success);">Impacto: -17 conflitos de bairro</span>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="chart-card">
+                    <h3>🔍 Causa Raiz Identificada</h3>
+                    <div style="display: flex; flex-direction: column; gap: 16px; margin-top: 20px;">
+                        <div style="background: var(--success-bg); padding: 16px; border-radius: 12px;">
+                            <strong style="color: var(--success);">Atualizações T→P (371 casos) ✅</strong>
+                            <p style="font-size: 0.9rem; color: var(--text-secondary); margin-top: 8px;">
+                                <strong>Causa:</strong> Evolução natural do cadastro<br>
+                                <strong>Explicação:</strong> Terrenos construídos entre cadastros<br>
+                                <strong>Ação:</strong> Nenhuma — comportamento esperado
+                            </p>
+                        </div>
+                        <div style="background: var(--error-bg); padding: 16px; border-radius: 12px;">
+                            <strong style="color: var(--error);">Regressões P→T (80 casos) 🔴</strong>
+                            <p style="font-size: 0.9rem; color: var(--text-secondary); margin-top: 8px;">
+                                <strong>Causa provável:</strong> Erro no processo ETL/migração<br>
+                                <strong>Hipóteses:</strong><br>
+                                1. Erro sistemático em arquivos específicos<br>
+                                2. Reclassificação incorreta durante importação<br>
+                                3. Bug no processo de carga<br>
+                                <strong>Evidência:</strong> 2 arquivos = 51% dos casos
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Actions Section -->
+    <section id="acoes" style="background: var(--bg-surface);">
+        <div class="container">
+            <div class="section-header">
+                <div class="section-label">Plano de Ação</div>
+                <h2 class="section-title">Recomendações Priorizadas</h2>
+                <p class="section-desc">Roadmap estruturado para atingir 99%+ de consistência em 1-3 meses.</p>
             </div>
 
             <div class="timeline">
                 <div class="timeline-item urgent">
-                    <div class="timeline-marker">
-                        <i class="fas fa-bolt"></i>
-                    </div>
+                    <div class="timeline-dot"></div>
                     <div class="timeline-content">
-                        <div class="timeline-badge">URGENTE - Esta Semana</div>
-                        <h3>Ações Imediatas</h3>
-                        <ul class="timeline-list">
-                            <li>
-                                <i class="fas fa-check-circle"></i>
-                                <span><strong>Investigar 80 Regressões P→T</strong> - Foco em Barra Mar (52) e Altavistta (21)</span>
-                            </li>
-                            <li>
-                                <i class="fas fa-check-circle"></i>
-                                <span><strong>Coletar 144 Imagens</strong> - Praia Bonita precisa urgente de cobertura fotográfica</span>
-                            </li>
+                        <div class="timeline-label">🔴 Urgente — Esta Semana</div>
+                        <h4>1. Investigar 80 Regressões P→T</h4>
+                        <ul>
+                            <li>Abrir planilha REGRESSOES_PT_INVESTIGACAO.xlsx</li>
+                            <li>Verificar imagens disponíveis nos links</li>
+                            <li>Foco: BARRA MAR (52 casos) e ALTAVISTTA (21 casos)</li>
+                            <li>Documentar em coluna "Status Investigação"</li>
+                            <li><strong>Prazo: 5 dias úteis</strong></li>
                         </ul>
-                        <div class="timeline-meta">
-                            <span><i class="fas fa-clock"></i> Prazo: 5 dias úteis</span>
-                            <span><i class="fas fa-user"></i> Equipe: Fiscalização + Campo</span>
-                        </div>
+                    </div>
+                </div>
+
+                <div class="timeline-item urgent">
+                    <div class="timeline-dot"></div>
+                    <div class="timeline-content">
+                        <div class="timeline-label">🔴 Urgente — Esta Semana</div>
+                        <h4>2. Coletar Imagens — Praia Bonita</h4>
+                        <ul>
+                            <li>Meta: De 42,6% para 90%+ (coletar 144 imagens)</li>
+                            <li>Foco: BARRABALI_CONDOMINIO (0/136) e PRAIA_BONITA</li>
+                            <li>Campanha de coleta in loco</li>
+                            <li><strong>Prazo: 2 semanas</strong></li>
+                        </ul>
                     </div>
                 </div>
 
                 <div class="timeline-item short">
-                    <div class="timeline-marker">
-                        <i class="fas fa-forward"></i>
-                    </div>
+                    <div class="timeline-dot"></div>
                     <div class="timeline-content">
-                        <div class="timeline-badge">CURTO PRAZO - 2-3 Semanas</div>
-                        <h3>Correções e Sincronização</h3>
-                        <ul class="timeline-list">
-                            <li>
-                                <i class="fas fa-wrench"></i>
-                                <span><strong>Correção em Massa</strong> - Script para corrigir regressões após investigação</span>
-                            </li>
-                            <li>
-                                <i class="fas fa-sync"></i>
-                                <span><strong>Sincronizar 1.152 Registros</strong> - Unificar bases Planurbi e Kalana</span>
-                            </li>
-                            <li>
-                                <i class="fas fa-map"></i>
-                                <span><strong>Resolver 9 Conflitos</strong> - Definir limites oficiais entre bairros</span>
-                            </li>
+                        <div class="timeline-label">🟡 Curto Prazo — 2-3 Semanas</div>
+                        <h4>3. Correção em Massa das Regressões</h4>
+                        <ul>
+                            <li>Desenvolver script de correção após investigação</li>
+                            <li>Testar em ambiente de homologação</li>
+                            <li>Executar com backup prévio</li>
+                            <li>Re-auditar após correção</li>
+                            <li><strong>Meta: Taxa de consistência >99%</strong></li>
                         </ul>
-                        <div class="timeline-meta">
-                            <span><i class="fas fa-clock"></i> Meta: Taxa >99%</span>
-                            <span><i class="fas fa-shield-alt"></i> Com backup prévio</span>
-                        </div>
+                    </div>
+                </div>
+
+                <div class="timeline-item short">
+                    <div class="timeline-dot"></div>
+                    <div class="timeline-content">
+                        <div class="timeline-label">🟡 Curto Prazo — 2-3 Semanas</div>
+                        <h4>4. Sincronizar Registros Sem Match</h4>
+                        <ul>
+                            <li>Investigar 765 registros só no Planurbi</li>
+                            <li>Investigar 387 registros só na Kalana</li>
+                            <li>Determinar regra: qual base prevalece</li>
+                            <li>Executar sincronização</li>
+                        </ul>
                     </div>
                 </div>
 
                 <div class="timeline-item medium">
-                    <div class="timeline-marker">
-                        <i class="fas fa-chart-line"></i>
-                    </div>
+                    <div class="timeline-dot"></div>
                     <div class="timeline-content">
-                        <div class="timeline-badge">MÉDIO PRAZO - 1-2 Meses</div>
-                        <h3>Melhorias e Documentação</h3>
-                        <ul class="timeline-list">
-                            <li>
-                                <i class="fas fa-camera"></i>
-                                <span><strong>Completar Cobertura</strong> - 90%+ de imagens em todos os bairros</span>
-                            </li>
-                            <li>
-                                <i class="fas fa-book"></i>
-                                <span><strong>Manual de Classificação</strong> - Documentar regras P vs T vs R</span>
-                            </li>
-                            <li>
-                                <i class="fas fa-database"></i>
-                                <span><strong>Base Master</strong> - Estabelecer fonte única da verdade</span>
-                            </li>
+                        <div class="timeline-label">🟢 Médio Prazo — 1-2 Meses</div>
+                        <h4>5. Completar Cobertura de Imagens</h4>
+                        <ul>
+                            <li>Barra Mar: coletar 632 imagens (meta: 90%+)</li>
+                            <li>Altavistta: coletar 186 imagens (meta: 90%+)</li>
+                            <li>Outros: 51 imagens</li>
+                            <li><strong>Meta global: 90%+ em todos os bairros</strong></li>
                         </ul>
-                        <div class="timeline-meta">
-                            <span><i class="fas fa-target"></i> Meta: 90%+ imagens</span>
-                            <span><i class="fas fa-file-alt"></i> Processos documentados</span>
-                        </div>
+                    </div>
+                </div>
+
+                <div class="timeline-item medium">
+                    <div class="timeline-dot"></div>
+                    <div class="timeline-content">
+                        <div class="timeline-label">🟢 Médio Prazo — 1-2 Meses</div>
+                        <h4>6. Documentação e Governança</h4>
+                        <ul>
+                            <li>Criar manual de classificação P vs T vs R</li>
+                            <li>Documentar regra: T→P = atualização normal</li>
+                            <li>Estabelecer base "master" (fonte da verdade)</li>
+                            <li>Processo de validação de novos cadastros</li>
+                        </ul>
                     </div>
                 </div>
 
                 <div class="timeline-item long">
-                    <div class="timeline-marker">
-                        <i class="fas fa-rocket"></i>
-                    </div>
+                    <div class="timeline-dot"></div>
                     <div class="timeline-content">
-                        <div class="timeline-badge">LONGO PRAZO - 3-6 Meses</div>
-                        <h3>Automação e Excelência</h3>
-                        <ul class="timeline-list">
-                            <li>
-                                <i class="fas fa-robot"></i>
-                                <span><strong>Sincronização Automática</strong> - Kalana ↔ Planurbi em tempo real</span>
-                            </li>
-                            <li>
-                                <i class="fas fa-bell"></i>
-                                <span><strong>Sistema de Alertas</strong> - Notificação de novas inconsistências</span>
-                            </li>
-                            <li>
-                                <i class="fas fa-tachometer-alt"></i>
-                                <span><strong>Dashboard de Monitoramento</strong> - Métricas em tempo real</span>
-                            </li>
-                            <li>
-                                <i class="fas fa-graduation-cap"></i>
-                                <span><strong>Treinamento</strong> - Capacitação de equipes</span>
-                            </li>
+                        <div class="timeline-label">🔵 Longo Prazo — 3-6 Meses</div>
+                        <h4>7. Automação e Monitoramento</h4>
+                        <ul>
+                            <li>Implementar sincronização automática Kalana ↔ Planurbi</li>
+                            <li>Sistema de alertas para novas inconsistências</li>
+                            <li>Dashboard de monitoramento contínuo</li>
+                            <li>Auditoria automática mensal</li>
+                            <li>Estabelecer SLA de consistência (>99%)</li>
                         </ul>
-                        <div class="timeline-meta">
-                            <span><i class="fas fa-trophy"></i> Meta: 99,9% consistência</span>
-                            <span><i class="fas fa-infinity"></i> Melhoria contínua</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Goals Section -->
+    <section>
+        <div class="container">
+            <div class="section-header">
+                <div class="section-label">Metas</div>
+                <h2 class="section-title">KPIs e Métricas de Sucesso</h2>
+                <p class="section-desc">Indicadores para monitoramento contínuo da qualidade dos dados.</p>
+            </div>
+
+            <div class="goals-grid">
+                <div class="goal-card">
+                    <h4>Consistência Geral</h4>
+                    <div class="goal-current">97,2%</div>
+                    <div class="goal-target">Meta 3 meses: 99,5%</div>
+                    <div class="goal-progress">
+                        <div class="goal-progress-bar" style="width: 97.2%;"></div>
+                    </div>
+                </div>
+                <div class="goal-card">
+                    <h4>Regressões P→T</h4>
+                    <div class="goal-current" style="color: var(--error);">80</div>
+                    <div class="goal-target">Meta 1 mês: 0</div>
+                    <div class="goal-progress">
+                        <div class="goal-progress-bar" style="width: 0%; background: var(--error);"></div>
+                    </div>
+                </div>
+                <div class="goal-card">
+                    <h4>Cobertura Imagens</h4>
+                    <div class="goal-current">77,0%</div>
+                    <div class="goal-target">Meta 3 meses: 90%</div>
+                    <div class="goal-progress">
+                        <div class="goal-progress-bar" style="width: 77%;"></div>
+                    </div>
+                </div>
+                <div class="goal-card">
+                    <h4>Sem Match</h4>
+                    <div class="goal-current" style="color: var(--warning);">1.152</div>
+                    <div class="goal-target">Meta 3 meses: &lt;200</div>
+                    <div class="goal-progress">
+                        <div class="goal-progress-bar" style="width: 17%; background: var(--warning);"></div>
+                    </div>
+                </div>
+                <div class="goal-card">
+                    <h4>Conflitos Bairro</h4>
+                    <div class="goal-current">9</div>
+                    <div class="goal-target">Meta 1 mês: 0</div>
+                    <div class="goal-progress">
+                        <div class="goal-progress-bar" style="width: 10%;"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- KPIs Table -->
+            <div class="chart-card" style="margin-top: 40px;">
+                <h3>📊 Metas por Período</h3>
+                <table class="divergence-table" style="margin-top: 20px;">
+                    <thead>
+                        <tr>
+                            <th>Métrica</th>
+                            <th>Atual</th>
+                            <th>Meta 1 Mês</th>
+                            <th>Meta 3 Meses</th>
+                            <th>Meta 6 Meses</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Consistência Geral</strong></td>
+                            <td>97,2%</td>
+                            <td style="color: var(--accent);">99,0%</td>
+                            <td style="color: var(--accent);">99,5%</td>
+                            <td style="color: var(--success);">99,9%</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Regressões P→T</strong></td>
+                            <td style="color: var(--error);">80</td>
+                            <td style="color: var(--success);">0</td>
+                            <td style="color: var(--success);">0</td>
+                            <td style="color: var(--success);">0</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Cobertura Imagens</strong></td>
+                            <td>77,0%</td>
+                            <td>85,0%</td>
+                            <td style="color: var(--accent);">90,0%</td>
+                            <td style="color: var(--success);">95,0%</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Registros Sem Match</strong></td>
+                            <td style="color: var(--warning);">1.152</td>
+                            <td>&lt;500</td>
+                            <td>&lt;200</td>
+                            <td style="color: var(--success);">&lt;100</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Arquipélago do Sol</strong></td>
+                            <td>99,0%</td>
+                            <td style="color: var(--success);">100%</td>
+                            <td style="color: var(--success);">100%</td>
+                            <td style="color: var(--success);">100%</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Praia Bonita</strong></td>
+                            <td>97,1%</td>
+                            <td>99,0%</td>
+                            <td style="color: var(--success);">100%</td>
+                            <td style="color: var(--success);">100%</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Barra Mar</strong></td>
+                            <td>97,1%</td>
+                            <td>99,0%</td>
+                            <td>99,5%</td>
+                            <td style="color: var(--success);">100%</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+
+    <!-- Files Section -->
+    <section style="background: var(--bg-surface);">
+        <div class="container">
+            <div class="section-header">
+                <div class="section-label">Entregáveis</div>
+                <h2 class="section-title">Arquivos Gerados</h2>
+                <p class="section-desc">Documentação completa e planilhas de trabalho para investigação e correção.</p>
+            </div>
+
+            <div class="files-grid">
+                <div class="file-card main">
+                    <div class="file-header">
+                        <div class="file-icon xlsx">📊</div>
+                        <div class="file-info">
+                            <h4>AUDITORIA_COMPLETA_COLORIDA_FINAL.xlsx</h4>
+                            <p>Planilha principal com todas as 3.468 inscrições auditadas</p>
                         </div>
                     </div>
+                    <div class="file-details">
+                        <ul>
+                            <li>🟢 Verde: 3.000 OK (86,5%)</li>
+                            <li>🔵 Azul: 371 Atualizações T→P (10,7%)</li>
+                            <li>🔴 Vermelho: 80 Regressões P→T (2,3%)</li>
+                            <li>🟠 Laranja: 9 Conflito bairro (0,3%)</li>
+                            <li>7 abas: Resumo + Todas + 5 bairros</li>
+                            <li>Links de imagens clicáveis</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="file-card">
+                    <div class="file-header">
+                        <div class="file-icon xlsx">🔴</div>
+                        <div class="file-info">
+                            <h4>REGRESSOES_PT_INVESTIGACAO.xlsx</h4>
+                            <p>80 casos críticos para investigação manual</p>
+                        </div>
+                    </div>
+                    <div class="file-details">
+                        <ul>
+                            <li>Coluna "Status Investigação" para preencher</li>
+                            <li>Coluna "Observações" para justificativa</li>
+                            <li>Abas: Resumo + Lista + BARRA MAR + ALTAVISTTA</li>
+                            <li>Links de imagens para verificação</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="file-card">
+                    <div class="file-header">
+                        <div class="file-icon csv">📈</div>
+                        <div class="file-info">
+                            <h4>ESTATISTICAS_COMPLETAS_POR_BAIRRO.csv</h4>
+                            <p>Dados consolidados em formato CSV</p>
+                        </div>
+                    </div>
+                    <div class="file-details">
+                        <ul>
+                            <li>Totais, matches, divergências por bairro</li>
+                            <li>Cobertura de imagens</li>
+                            <li>Formato para importação em dashboards</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="file-card">
+                    <div class="file-header">
+                        <div class="file-icon md">📝</div>
+                        <div class="file-info">
+                            <h4>AUDITORIA_KALANA_PLANURBI_FINAL.md</h4>
+                            <p>Relatório executivo completo</p>
+                        </div>
+                    </div>
+                    <div class="file-details">
+                        <ul>
+                            <li>Estatísticas, análises, diagnósticos</li>
+                            <li>Recomendações priorizadas</li>
+                            <li>Formato Markdown para documentação</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Conclusion Section -->
+    <section>
+        <div class="container">
+            <div class="conclusion">
+                <div class="conclusion-content">
+                    <div class="conclusion-score">9.7/10</div>
+                    <h2>Qualidade de Dados: EXCELENTE</h2>
+                    <p>
+                        A auditoria Kalana vs Planurbi apresenta taxa de consistência de <strong>97,2%</strong>, 
+                        indicando bases bem alinhadas. Os problemas identificados são <strong>pontuais</strong> (80 casos de 3.468), 
+                        <strong>concentrados</strong> (91% em 2 bairros) e <strong>corrigíveis</strong> (padrão claro identificado).
+                    </p>
+                    <p style="font-size: 1rem; margin-top: 16px;">
+                        ✅ Taxa 5x melhor que modelo original (77,1% → 97,2%)<br>
+                        ✅ Todos os 5 bairros acima de 96%<br>
+                        ✅ Meta de 99%+ alcançável em 1-3 meses
+                    </p>
+                    <a href="#contato" class="conclusion-cta">
+                        Agendar Apresentação
+                        <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path>
+                        </svg>
+                    </a>
                 </div>
             </div>
         </div>
     </section>
 
     <!-- Footer -->
-    <footer class="footer">
+    <footer>
         <div class="container">
             <div class="footer-content">
                 <div class="footer-info">
-                    <h3>Auditoria KALANA vs PLANURBI</h3>
-                    <p>Relatório técnico de consistência de dados cadastrais</p>
-                    <p class="footer-date">
-                        <i class="far fa-calendar-alt"></i>
-                        16 de dezembro de 2025
-                    </p>
+                    <div class="logo">
+                        <div class="logo-icon">📊</div>
+                        <span>Auditoria Kalana × Planurbi</span>
+                    </div>
+                    <p>Documento confidencial — Uso interno apenas</p>
                 </div>
-                <div class="footer-stats">
-                    <div class="footer-stat">
-                        <div class="stat-value">97,2%</div>
-                        <div class="stat-label">Consistência</div>
-                    </div>
-                    <div class="footer-stat">
-                        <div class="stat-value">3.468</div>
-                        <div class="stat-label">Registros</div>
-                    </div>
-                    <div class="footer-stat">
-                        <div class="stat-value">5</div>
-                        <div class="stat-label">Bairros</div>
-                    </div>
+                <div class="footer-meta">
+                    <p><strong>Versão:</strong> 3.0 Final</p>
+                    <p><strong>Data:</strong> 16 de dezembro de 2025</p>
+                    <p><strong>Metodologia:</strong> Análise comparativa com regra T→P = atualização</p>
                 </div>
-            </div>
-            <div class="footer-bottom">
-                <p>&copy; 2025 Sistema de Auditoria Automatizada. Todos os direitos reservados.</p>
-                <p class="footer-note">Documento confidencial - Uso interno apenas</p>
             </div>
         </div>
     </footer>
 
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="js/main.js"></script>
+    <script>
+        // Tab functionality
+        document.querySelectorAll('.analysis-tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                document.querySelectorAll('.analysis-tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.analysis-content').forEach(c => c.classList.remove('active'));
+                
+                tab.classList.add('active');
+                document.getElementById(tab.dataset.tab).classList.add('active');
+            });
+        });
+
+        // Scroll animations
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+
+        // Charts
+        const chartColors = {
+            primary: '#00BFA5',
+            secondary: '#00362D',
+            success: '#4CAF50',
+            warning: '#FFB300',
+            error: '#FF5252',
+            blue: '#2196F3',
+            text: '#A5C4B8',
+            grid: 'rgba(0, 191, 165, 0.1)'
+        };
+
+        Chart.defaults.color = chartColors.text;
+        Chart.defaults.borderColor = chartColors.grid;
+
+        // Volume Chart
+        new Chart(document.getElementById('volumeChart'), {
+            type: 'bar',
+            data: {
+                labels: ['Total Registros', 'Com Match', 'Sem Match'],
+                datasets: [
+                    {
+                        label: 'Planurbi',
+                        data: [4233, 3468, 765],
+                        backgroundColor: chartColors.primary,
+                        borderRadius: 6
+                    },
+                    {
+                        label: 'Kalana',
+                        data: [3855, 3468, 387],
+                        backgroundColor: chartColors.secondary,
+                        borderRadius: 6
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'bottom'
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        grid: {
+                            color: chartColors.grid
+                        }
+                    },
+                    x: {
+                        grid: {
+                            display: false
+                        }
+                    }
+                }
+            }
+        });
+
+        // Divergence Chart
+        new Chart(document.getElementById('divergenceChart'), {
+            type: 'doughnut',
+            data: {
+                labels: ['OK (Tipos Iguais)', 'Atualizações T→P', 'Regressões P→T', 'Outros'],
+                datasets: [{
+                    data: [3000, 371, 80, 17],
+                    backgroundColor: [
+                        chartColors.success,
+                        chartColors.blue,
+                        chartColors.error,
+                        chartColors.warning
+                    ],
+                    borderWidth: 0
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'bottom'
+                    }
+                },
+                cutout: '60%'
+            }
+        });
+
+        // Ranking Chart
+        new Chart(document.getElementById('rankingChart'), {
+            type: 'bar',
+            data: {
+                labels: ['Arquipélago do Sol', 'Praia Bonita', 'Barra Mar', 'Altavistta', 'Recanto'],
+                datasets: [
+                    {
+                        label: 'Consistência',
+                        data: [99.0, 97.1, 97.1, 96.7, 96.2],
+                        backgroundColor: chartColors.primary,
+                        borderRadius: 6,
+                        yAxisID: 'y'
+                    },
+                    {
+                        label: 'Cobertura Imagens',
+                        data: [99.3, 42.6, 74.0, 79.8, 95.8],
+                        backgroundColor: chartColors.secondary,
+                        borderRadius: 6,
+                        yAxisID: 'y'
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                indexAxis: 'y',
+                plugins: {
+                    legend: {
+                        position: 'bottom'
+                    }
+                },
+                scales: {
+                    x: {
+                        beginAtZero: true,
+                        max: 100,
+                        grid: {
+                            color: chartColors.grid
+                        }
+                    },
+                    y: {
+                        grid: {
+                            display: false
+                        }
+                    }
+                }
+            }
+        });
+
+        // Evolution Chart
+        new Chart(document.getElementById('evolutionChart'), {
+            type: 'line',
+            data: {
+                labels: ['Inicial', 'Após Normalização', 'Após BARRABALI', 'Após Regra T→P', 'Final (BARRAMAR)'],
+                datasets: [{
+                    label: 'Taxa de Consistência',
+                    data: [17.9, 76.9, 86.1, 96.7, 97.2],
+                    borderColor: chartColors.primary,
+                    backgroundColor: 'rgba(0, 191, 165, 0.1)',
+                    fill: true,
+                    tension: 0.4,
+                    pointBackgroundColor: chartColors.primary,
+                    pointRadius: 6,
+                    pointHoverRadius: 8
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        max: 100,
+                        grid: {
+                            color: chartColors.grid
+                        },
+                        ticks: {
+                            callback: value => value + '%'
+                        }
+                    },
+                    x: {
+                        grid: {
+                            display: false
+                        }
+                    }
+                }
+            }
+        });
+
+        // Smooth scroll for nav links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+    </script>
 </body>
 </html>
